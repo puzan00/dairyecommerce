@@ -1,0 +1,140 @@
+{% extends 'ecom/admin_base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid px-4">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3">
+      <div class="row align-items-center">
+        <div class="col-md-4">
+          <h5 class="mb-0 text-primary">
+            <i class="fas fa-users me-2"></i>Customer Management
+          </h5>
+        </div>
+        <div class="col-md-8">
+          <div class="d-flex gap-2 justify-content-md-end">
+            <div class="input-group input-group-sm" style="max-width: 300px;">
+              <span class="input-group-text bg-light border-end-0">
+                <i class="fas fa-search text-muted"></i>
+              </span>
+              <input type="text" class="form-control border-start-0" id="customerSearch" placeholder="Search customers...">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="customersTable">
+          <thead class="bg-light">
+            <tr>
+              <th class="px-3 py-2">SN.</th>
+              <th class="px-3 py-2">Customer</th>
+              <th class="py-2">Contact</th>
+              <th class="py-2">Address</th>
+              <th class="py-2">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in customers %}
+            <tr>
+              <td class="px-3">{{ forloop.counter }}</td>
+              <td class="px-3">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    <img src="{% static c.profile_pic.url %}" 
+                         class="rounded-circle border" 
+                         alt="{{ c.get_name }}" 
+                         width="35" 
+                         height="35"
+                         style="object-fit: cover;" />
+                  </div>
+                  <div>
+                    <h6 class="mb-0">{{ c.get_name }}</h6>
+                    <small class="text-muted">ID: {{ c.id }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-phone-alt text-muted me-2"></i>
+                  {{ c.mobile }}
+                </div>
+              </td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                  <span class="text-truncate" style="max-width: 150px;" title="{{ c.address }}">
+                    {{ c.address }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-success">Active</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.card {
+  border-radius: 0.75rem;
+}
+
+.card-header {
+  border-bottom: 1px solid rgba(0,0,0,.05);
+}
+
+.table > :not(caption) > * > * {
+  padding: 0.75rem 0;
+}
+
+.badge {
+  padding: 0.4em 0.6em;
+  font-weight: 500;
+}
+
+.text-truncate {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.input-group-text {
+  background-color: transparent;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Search functionality
+  document.getElementById('customerSearch').addEventListener('keyup', function() {
+    var input = this.value.toLowerCase();
+    var table = document.getElementById('customersTable');
+    var rows = table.getElementsByTagName('tr');
+
+    for (var i = 1; i < rows.length; i++) {
+      var text = rows[i].textContent.toLowerCase();
+      rows[i].style.display = text.indexOf(input) > -1 ? '' : 'none';
+    }
+  });
+});
+</script>
+
+{% endblock content %}

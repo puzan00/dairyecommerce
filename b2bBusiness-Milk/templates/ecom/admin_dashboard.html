@@ -1,0 +1,274 @@
+{% extends 'ecom/admin_base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Main Dashboard Container -->
+<div class="container-fluid px-4 py-4">
+  
+  <!-- Dashboard Header -->
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="fw-bold text-primary">Admin Dashboard</h2>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Dashboard Cards -->
+  {% include 'ecom/admin_dashboard_cards.html' %}
+
+  <!-- Analytics Section -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">Analytics Overview</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="chart-container" style="position: relative; height:300px;">
+                <canvas id="ordersChart"></canvas>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="chart-container" style="position: relative; height:300px;">
+                <canvas id="inventoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Bookings Section -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Recent Bookings</h5>
+          <button class="btn btn-sm btn-outline-primary">View All</button>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover" id="dev-table">
+              <thead class="table-light">
+                <tr>
+                  <th>Customer</th>
+                  <th>Contact</th>
+                  <th>Shipment Address</th>
+                  <th>Product</th>
+                  <th>Image</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for product, customer, order in data %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar avatar-sm me-2">
+                        <div class="avatar-initial rounded-circle bg-light">
+                          {{ customer.get_name|slice:":1" }}
+                        </div>
+                      </div>
+                      <div>{{ customer.get_name }}</div>
+                    </div>
+                  </td>
+                  <td>{{ customer.mobile }}</td>
+                  <td>
+                    <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                      {{ order.address }}
+                    </span>
+                  </td>
+                  <td>{{ product.name }}</td>
+                  <td>
+                    <img src="{% static product.product_image.url %}" class="rounded" alt="Product Image" height="40px" width="40px" />
+                  </td>
+                  <td>
+                    {% if order.status == 'Pending' %}
+                    <span class="badge bg-warning text-dark">{{ order.status }}</span>
+                    {% elif order.status == 'Delivered' %}
+                    <span class="badge bg-success">{{ order.status }}</span>
+                    {% elif order.status == 'Out for Delivery' %}
+                    <span class="badge bg-info">{{ order.status }}</span>
+                    {% else %}
+                    <span class="badge bg-primary">{{ order.status }}</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- Expiry Alerts Section -->
+  <!-- Expiry Alerts Section -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white">
+        <h5 class="card-title mb-0 text-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>Expiry Alerts
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+            <h6 class="fw-bold mb-3">Expired Products</h6>
+            <div class="list-group">
+              {% for product in expired_products %}
+              <div class="list-group-item list-group-item-secondary d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="fas fa-times-circle me-2"></i>
+                  {{ product.name }}
+                </div>
+                <span class="badge bg-danger text-white">
+                  Expired: {{ product.expiry_date }}
+                </span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <h6 class="fw-bold mb-3">Warning (7 Days)</h6>
+            <div class="list-group">
+              {% for product in expiry_7_days %}
+              <div class="list-group-item list-group-item-warning d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="fas fa-clock me-2"></i>
+                  {{ product.name }}
+                </div>
+                <span class="badge bg-warning text-dark">
+                  {{ product.quantity }} {{ product.unit }}
+                </span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="col-md-4">
+            <h6 class="fw-bold mb-3">Critical (30 Days)</h6>
+            <div class="list-group">
+              {% for product in expiry_30_days %}
+              <div class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="fas fa-exclamation-circle me-2"></i>
+                  {{ product.name }}
+                </div>
+                <span class="badge bg-danger">
+                  {{ product.quantity }} {{ product.unit }}
+                </span>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Orders Chart
+  const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+  const ordersChart = new Chart(ordersCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Pending', 'Confirmed', 'Out for Delivery', 'Delivered'],
+      datasets: [{
+        label: 'Order Status',
+        data: [
+          {{ order_status_count.Pending }},
+          {{ order_status_count.OrderConfirmed }},
+          {{ order_status_count.OutforDelivery }},
+          {{ order_status_count.Delivered }},
+        ],
+        backgroundColor: [
+          'rgba(243, 156, 18, 0.7)',
+          'rgba(52, 152, 219, 0.7)',
+          'rgba(243, 156, 18, 0.7)',
+          'rgba(39, 174, 96, 0.7)'
+        ],
+        borderColor: [
+          'rgb(243, 156, 18)',
+          'rgb(52, 152, 219)',
+          'rgb(243, 156, 18)',
+          'rgb(39, 174, 96)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: 'Order Status Distribution'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  // Inventory Chart
+  const inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
+  const inventoryChart = new Chart(inventoryCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Low Stock', 'High Stock'],
+      datasets: [{
+        data: [
+          {{ low_stock_products.count }},
+          {{ high_stock_products.count }}
+        ],
+        backgroundColor: [
+          'rgba(231, 76, 60, 0.7)',
+          'rgba(46, 204, 113, 0.7)'
+        ],
+        borderColor: [
+          'rgb(231, 76, 60)',
+          'rgb(46, 204, 113)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20
+          }
+        },
+        title: {
+          display: true,
+          text: 'Inventory Status'
+        }
+      }
+    }
+  });
+</script>
+
+{% endblock content %}

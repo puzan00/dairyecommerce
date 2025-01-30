@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+{% load widget_tweaks %}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B2B Ecommerce - Sign Up</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f9fa;
+      }
+
+      .vh-100 {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .card {
+        border-radius: 25px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        background-color: #fff;
+      }
+
+      .card-body {
+        padding: 2rem;
+      }
+
+      .h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .form-outline {
+        margin-bottom: 1.5rem;
+        position: relative;
+      }
+
+      .form-outline input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+      }
+
+      .form-outline input:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+      }
+
+      .form-outline label {
+        font-size: 0.9rem;
+        color: #555;
+        position: absolute;
+        top: -8px;
+        left: 12px;
+        background: #fff;
+        padding: 0 5px;
+      }
+
+      .btn-primary {
+        background-color: #007bff;
+        border: none;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .btn-primary:hover {
+        background-color: #0056b3;
+      }
+
+      .form-check-label {
+        font-size: 0.9rem;
+        color: #555;
+      }
+
+      .img-fluid {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+      }
+
+      .error {
+        color: red;
+        font-size: 0.9rem;
+        margin-top: -10px;
+        margin-bottom: 10px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    {% include "ecom/navbar.html" %}
+    <section class="vh-100">
+      <div class="container h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+          <div class="col-lg-12 col-xl-11">
+            <div class="card text-black">
+              <div class="card-body">
+                <div class="row justify-content-center">
+                  <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
+                    <p class="h1 fw-bold">Sign Up</p>
+                    <form id="signupForm" class="mx-1 mx-md-4" method="post" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      <div class="form-outline">
+                        {% render_field userForm.first_name class="form-control" placeholder="First Name" %}
+                        <label for="first_name">First Name</label>
+                      </div>
+                      <div class="form-outline">
+                        {% render_field userForm.last_name class="form-control" placeholder="Last Name" %}
+                        <label for="last_name">Last Name</label>
+                      </div>
+                      <div class="form-outline">
+                        {% render_field userForm.username class="form-control" placeholder="Username" %}
+                        <label for="username">Username</label>
+                      </div>
+                      <div class="form-outline">
+                        {% render_field userForm.password class="form-control" placeholder="Password" %}
+                        <label for="password">Password</label>
+                        <small id="passwordError" class="error">Password must be at least 8 characters, include an uppercase letter, a number, and a special character.</small>
+                      </div>
+                      <div class="form-outline">
+                        {% render_field customerForm.address class="form-control" placeholder="Address" %}
+                        <label for="address">Address</label>
+                      </div>
+                      <div class="form-outline">
+                        {% render_field customerForm.mobile class="form-control" placeholder="Contact" %}
+                        <label for="mobile">Contact</label>
+                      </div>
+                      <div class="form-outline">
+                        {% render_field customerForm.profile_pic class="form-control" %}
+                        <label for="profile_pic">Profile Picture</label>
+                      </div>
+                      <div class="form-check d-flex justify-content-center mb-4">
+                        <input class="form-check-input" type="checkbox" value="" id="terms" required />
+                        <label class="form-check-label" for="terms">
+                          I agree to the <a href="#">Terms of Service</a>
+                        </label>
+                      </div>
+                      <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="col-md-10 col-lg-6 col-xl-7 order-1 order-lg-2">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp" class="img-fluid" alt="Sign Up Image">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {% include "ecom/footer.html" %}
+    <script>
+      const form = document.getElementById("signupForm");
+      const passwordField = document.querySelector("#id_password");
+      const passwordError = document.getElementById("passwordError");
+
+      form.addEventListener("submit", (e) => {
+        const password = passwordField.value;
+        const strongPasswordRegex =
+          /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        if (!strongPasswordRegex.test(password)) {
+          e.preventDefault(); // Prevent form submission
+          passwordError.style.display = "block";
+        } else {
+          passwordError.style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>

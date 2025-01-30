@@ -1,0 +1,88 @@
+{% extends 'ecom/admin_base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+
+<head>
+  <style>
+    a:link {
+      text-decoration: none;
+    }
+
+    .note {
+      text-align: center;
+      height: 80px;
+      background: linear-gradient(to left, #2C5364, #203A43, #0F2027);
+      color: #fff;
+      font-weight: bold;
+      line-height: 80px;
+      border-radius: 0.5rem;
+    }
+
+    .form-content {
+      padding: 2rem;
+      border: 1px solid #ced4da;
+      border-radius: 0.5rem;
+      background-color: #f9f9f9;
+    }
+
+    .form-control {
+      border-radius: 0.5rem;
+    }
+
+    .btnSubmit {
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      background: #009414;
+      color: #fff;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+    }
+
+    .btnSubmit:hover {
+      background: #007d11;
+    }
+
+    .container {
+      max-width: 800px;
+      margin-top: 3rem;
+    }
+  </style>
+
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<div class="container">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form">
+      <div class="note">
+        <p>Update Product Details</p>
+      </div>
+      <div class="form-content">
+        <div class="form-group">
+          <label for="product-name">Product Name</label>
+          {% render_field productForm.name class="form-control" id="product-name" placeholder="Enter product name" %}
+        </div>
+        <div class="form-group">
+          <label for="product-description">Product Description</label>
+          {% render_field productForm.description class="form-control" id="product-description" placeholder="Enter product description" %}
+        </div>
+        <div class="form-group">
+          <label for="product-price">Product Price</label>
+          {% render_field productForm.price class="form-control" id="product-price" placeholder="Enter product price" %}
+        </div>
+        <div class="form-group">
+          <label for="product-image">Product Image</label>
+          {% render_field productForm.product_image class="form-control-file" id="product-image" %}
+        </div>
+        <button type="submit" class="btnSubmit">Update Product Details</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Hamro Dairy - B2B Dairy Ecommerce</title>
+  <style media="screen">
+    .footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #f7f7f7;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .about-us, .overview {
+      padding: 80px 0;
+      background-color: #ffffff;
+      text-align: center;
+    }
+
+    .about-us h3, .overview h4 {
+      font-size: 2.8rem;
+      font-weight: 600;
+      color: #2C5364;
+      margin-bottom: 20px;
+    }
+
+    .about-us p, .overview p {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .overview ul {
+      list-style-type: none;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .overview .list-group-item {
+      font-size: 1.1rem;
+      background-color: #f4f4f4;
+      border: 1px solid #ddd;
+      margin: 10px;
+      padding: 15px 25px;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .overview .list-group-item:hover {
+      background-color: #f1f1f1;
+      transform: translateY(-5px);
+    }
+
+    .btn {
+      background-color: #009414;
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #007b3e;
+    }
+
+    .get-in-touch-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background-color: #e5bc41;
+      border: none;
+      border-radius: 50px;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+  }
+  
+  .get-in-touch-btn:hover {
+      background-color: #d4a033;
+      transform: scale(1.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .get-in-touch-btn:active {
+      background-color: #c59429;
+      transform: scale(1);
+  }
+  </style>
+</head>
+
+<body style="background-color:#f7f7f7;">
+  {% if request.user.is_authenticated %}
+    {% include "ecom/customer_navbar.html" %}
+  {% else %}
+    {% include "ecom/navbar.html" %}
+  {% endif %}
+
+  <br><br><br>
+
+  <!-- About Section -->
+  <section class="about-us">
+    <div class="container">
+      <h3 class="display-4">Hamro Dairy - Your Trusted B2B Dairy Platform</h3>
+      <p class="lead">Hamro Dairy  is an online platform developed to enhance the operational efficiency of local Nepalese dairy producers, primarily small-scale farmers. This system addresses the common challenges faced by dairy producers by integrating production management, inventory, and sales functions into one platform. By digitizing these processes, the system helps reduce product losses and ensures a more efficient value chain, meeting the increasing demand for dairy products.</p>
+    </div>
+  </section>
+
+  <br><br>
+
+  <section class="overview">
+    <div class="container">
+      <h4>Our Commitment</h4>
+      <p>Our B2B-focused platform allows retailers to directly place orders for premium dairy products such as milk, curd, cheese, and butter. This direct interaction improves the market access of small-scale farmers, giving them greater control over their sales processes and revenue. Additionally, the system’s integrated e-commerce features help farmers showcase their products prominently, enhancing their market exposure and increasing their customer reach in an increasingly competitive market.</p>
+
+      <h4>Why Partner with Hamro Dairy?</h4>
+      <ul class="list-group">
+        <li class="list-group-item">Fresh, Premium-Quality Dairy Delivered on Time</li>
+        <li class="list-group-item">Direct Access to Trusted Dairy Farms and Producers</li>
+        <li class="list-group-item">Competitive Wholesale Prices Tailored to Your Business Needs</li>
+        <li class="list-group-item">Reliable and Efficient Logistics for Timely Deliveries</li>
+        <li class="list-group-item">Sustainability and Ethical Practices in Dairy Production</li>
+      </ul>
+
+    
+      <h4>Our Product Range</h4>
+      <p>We offer a diverse selection of dairy products to meet the needs of your business:</p>
+      <ul class="list-group">
+        <li class="list-group-item">Fresh Cow Milk</li>
+        <li class="list-group-item">Varieties of Cheese</li>
+        <li class="list-group-item">Yogurt (Plain and Flavored)</li>
+        <li class="list-group-item">Premium Butter</li>
+        <li class="list-group-item">Pure Ghee</li>
+        <li class="list-group-item">Fresh Paneer</li>
+        <li class="list-group-item">And much more...</li>
+      </ul>
+      
+      <br>
+      <p><a href="/contactus" class="btn get-in-touch-btn">Get in Touch</a></p>
+
+    </div>
+  </section>
+
+  <br><br>
+
+  <!-- Footer Section -->
+  {% include "ecom/footer.html" %}
+</body>
+
+</html>
