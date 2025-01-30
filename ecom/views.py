@@ -51,22 +51,35 @@ def adminclick_view(request):
 
 
 def customer_signup_view(request):
+    # Instantiate the forms
     userForm = forms.CustomerUserForm()
     customerForm = forms.CustomerForm()
     mydict = {"userForm": userForm, "customerForm": customerForm}
+    
+    # Check if the request is POST (form submission)
     if request.method == "POST":
         userForm = forms.CustomerUserForm(request.POST)
         customerForm = forms.CustomerForm(request.POST, request.FILES)
+        
         if userForm.is_valid() and customerForm.is_valid():
+            # Save the user data and set password (from the form input)
             user = userForm.save()
-            user.set_password(user.password)
+            user.set_password(user.password)  # Ensure the password is hashed
             user.save()
+            
+            # Save the customer data without committing (so we can assign the user)
             customer = customerForm.save(commit=False)
-            customer.user = user
+            customer.user = user  # Link the user to the customer profile
             customer.save()
+
+            # Add user to the "CUSTOMER" group
             my_customer_group = Group.objects.get_or_create(name="CUSTOMER")
             my_customer_group[0].user_set.add(user)
-        return HttpResponseRedirect("customerlogin")
+
+            # Redirect to login after successful signup
+            return HttpResponseRedirect("customerlogin")
+    
+    # Render the signup page with form data
     return render(request, "ecom/customersignup.html", context=mydict)
 
 
@@ -572,7 +585,7 @@ def payment_success_view(request):
             customer=customer,
             product=product,
             status="Pending",
-            email=email,
+            email=email, 
             mobile=mobile,
             address=address,
         )
@@ -659,37 +672,31 @@ def download_invoice_view(request, orderID, productID):
 def my_profile_view(request):
     customer = models.Customer.objects.get(user_id=request.user.id)
     return render(request, "ecom/my_profile.html", {"customer": customer})
-
-
-@login_required(login_url="customerlogin")
-@user_passes_test(is_customer)
+@login_required(login_url='customerlogin')
 def edit_profile_view(request):
     customer = get_object_or_404(models.Customer, user=request.user)
     user = request.user  # Directly use the authenticated user
 
     if request.method == "POST":
-        userForm = forms.CustomerUserForm(request.POST, instance=user)
-        customerForm = forms.CustomerForm(
-            request.POST, request.FILES, instance=customer
-        )
+        # Use the new forms: EditProfileForm (without password) and EditCustomerForm
+        userForm = forms.EditProfileForm(request.POST, instance=user)  # Without password field
+        customerForm = forms.EditCustomerForm(request.POST, request.FILES, instance=customer)
 
         if userForm.is_valid() and customerForm.is_valid():
-            userForm.save()  # Save user details
+            userForm.save()  # Save user details (excluding password)
             customerForm.save()  # Save customer details
-            return HttpResponseRedirect(
-                "my-profile"
-            )  # Redirect after successful update
+
+            # Log to verify the redirect URL
+            next_url = request.GET.get('next', 'my-profile')  # Get 'next' or fallback to 'my-profile'
+            print(f"Redirecting to: {next_url}")
+            return redirect(next_url)  # Redirect to 'next' or fallback
 
     else:
-        userForm = forms.CustomerUserForm(instance=user)  # Prefill with user data
-        customerForm = forms.CustomerForm(instance=customer)  # Prefill customer data
+        # Prefill the forms with the current user and customer data
+        userForm = forms.EditProfileForm(instance=user)  # Without password field
+        customerForm = forms.EditCustomerForm(instance=customer)
 
-    return render(
-        request,
-        "ecom/edit_profile.html",
-        {"userForm": userForm, "customerForm": customerForm},
-    )
-
+    return render(request, "ecom/edit_profile.html", {"userForm": userForm, "customerForm": customerForm})
 
 # ---------------------------------------------------------------------------------
 # ------------------------ ABOUT US AND CONTACT US VIEWS START --------------------

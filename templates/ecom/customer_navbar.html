@@ -89,18 +89,19 @@
         }
 
         .cart-button {
-            background-color: #e5bc41;
-            padding: 10px 15px;
+            background-color:rgb(233, 190, 19);
+            padding: 10px 10px;
             color: white;
             font-weight: bold;
             border-radius: 5px;
             display: inline-block;
             text-align: center;
             transition: all 0.3s ease;
+            margin-top:4px;
         }
 
         .cart-button:hover {
-            background-color: #d4a735;
+            background-color:rgb(172, 131, 29);
         }
 
         .item-number {
@@ -123,27 +124,16 @@
                 <li><a href="/my-order">Track Orders</a></li>
                 <li><a href="/my-profile">Profile</a></li>
                 <li><a href="/logout">Logout</a></li>
-                <li>
-                    <form action="/logout" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-link" style="padding:0; color:white;">Post Request</button>
-                    </form>
-                </li>
+               
                 <li>
                     <a class="cart-button" href="/cart">
-                        <i class="fa fa-shopping-cart"></i> Cart 
+                        <i class="fa fa-shopping-cart"></i>  
                         <span class="item-number">{{ product_count_in_cart }}</span>
+                        
                     </a>
                 </li>
             </ul>
-            {% comment %} <form class="navbar-form navbar-left" action="/search" method="get" role="search">
-                <div class="input-group">
-                    <input type="text" class="form-control navbar-input" placeholder="Search for Products, Brands and more" name="query">
-                    <span class="input-group-btn">
-                        <button type="submit" class="navbar-button"><i class="fa fa-search"></i></button>
-                    </span>
-                </div>
-            </form> {% endcomment %}
+            
         </div>
     </nav>
 

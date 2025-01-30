@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-
+<!-- Bootstrap JS -->
 
 <div class="container-fluid px-4">
     <!-- Page Header -->
@@ -26,7 +26,7 @@
                         <tr>
                             <th scope="col">Name</th>
                             <th scope="col">Image</th>
-                            <th scope="col">Price</th>
+                            <th scope="col">Price (Rs.)</th>
                             <th scope="col">Description</th>
                             <th scope="col">Quantity</th>
                             <th scope="col">Unit</th>
@@ -48,7 +48,7 @@
                                 <span class="text-muted">No image</span>
                                 {% endif %}
                             </td>
-                            <td>${{ p.price }}</td>
+                            <td>रू {{ p.price }}</td>  <!-- Updated to show price in NPR -->
                             <td>
                                 <div class="text-truncate" style="max-width: 200px;" 
                                      title="{{ p.description }}">
@@ -75,22 +75,20 @@
                                 </div>
 
                                 <!-- Delete Confirmation Modal -->
-                                <div class="modal fade" id="deleteModal{{ p.id }}" tabindex="-1">
+                                <div class="modal fade" id="deleteModal{{ p.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ p.id }}" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title">Confirm Delete</h5>
-                                                <button type="button" class="btn-close" 
-                                                        data-bs-dismiss="modal"></button>
+                                                <h5 class="modal-title" id="deleteModalLabel{{ p.id }}">Confirm Delete</h5>
+                                                
                                             </div>
                                             <div class="modal-body">
                                                 Are you sure you want to delete "{{ p.name }}"?
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" 
-                                                        data-bs-dismiss="modal">Cancel</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                                                 <a href="{% url 'delete-product' p.id %}" 
-                                                   class="btn btn-danger">Delete</a>
+                                                   class="btn btn-danger delete-link" id="deleteBtn{{ p.id }}">Delete</a>
                                             </div>
                                         </div>
                                     </div>
@@ -158,6 +156,14 @@
             return new bootstrap.Tooltip(tooltipTriggerEl)
         });
     });
+
+    // Function to handle delete confirmation
+    function confirmDelete(productId) {
+        const deleteBtn = document.getElementById('deleteBtn' + productId);
+        deleteBtn.addEventListener('click', function() {
+            window.location.href = deleteBtn.href;
+        });
+    }
 </script>
 {% endblock %}
 

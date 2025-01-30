@@ -321,7 +321,7 @@ img {
 }
 
 .slider-container{
-  height: 35%;
+  height: 40vh;
   width: 100%;
   position: relative;
   overflow: hidden; 
@@ -436,7 +436,7 @@ img {
                 </div>
 
                 <a class="cart" href="{% url 'add-to-cart' p.id  %}">
-                  <span class="price">${{p.price}}</span>
+                  <span class="price">Rs.{{p.price}}</span>
                   <span class="add-to-cart">
                     <span class="txt"><i class="fa fa-shopping-cart"></i> Add To Cart</span>
                   </span>

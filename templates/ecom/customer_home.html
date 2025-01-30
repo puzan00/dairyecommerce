@@ -47,7 +47,7 @@ body {
 }
 
 .el-wrapper {
-  width: 360px;
+  width: 320px;
   padding: 15px;
   margin: 15px auto;
   background-color: #fff;
@@ -323,7 +323,7 @@ img {
 }
 
 .slider-container{
-  height: 35%;
+  height: 40vh;
   width: 100%;
   position: relative;
   overflow: hidden; 
@@ -440,8 +440,8 @@ img {
                 </div>
 
                 <a class="cart" href="{% url 'add-to-cart' p.id  %}">
-                  <span class="price" style="text-decoration: line-through;">${{p.price}}</span>
-                  <span class="price" style="color: red;">${{ p.price|floatformat:2|add:"-0.1"|floatformat:2 }}</span>
+                  <span class="price">₨.{{p.price}}</span>
+                  
                   <span class="add-to-cart">
                     <span class="txt"><i class="fa fa-shopping-cart"></i> Add To Cart</span>
                   </span>

@@ -4,10 +4,12 @@ from . import models
 
 
 class CustomerUserForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=False)  # Make password optional
+
     class Meta:
         model = User
         fields = ["first_name", "last_name", "username", "password"]
-        widgets = {"password": forms.PasswordInput()}
+
 
 
 class CustomerForm(forms.ModelForm):
@@ -15,6 +17,15 @@ class CustomerForm(forms.ModelForm):
         model = models.Customer
         fields = ["address", "mobile", "profile_pic"]
 
+class EditProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "username"]  # Exclude password field
+
+class EditCustomerForm(forms.ModelForm):
+    class Meta:
+        model = models.Customer
+        fields = ["address", "mobile", "profile_pic"]  # Keep customer-related fields for updating
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -57,3 +68,4 @@ class ContactusForm(forms.Form):
     Message = forms.CharField(
         max_length=500, widget=forms.Textarea(attrs={"rows": 3, "cols": 30})
     )
+    

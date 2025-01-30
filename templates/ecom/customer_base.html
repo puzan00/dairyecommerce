@@ -19,7 +19,7 @@
 <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 
-<title>B2B Ecommerce</title>
+<title>Hamro Dairy</title>
 
 <style>
 body {
@@ -278,7 +278,7 @@ body {
         </div>
         <div class="row row2">
             <div class="col-sm-3">
-                <h2 style="margin:0px;"><a style="text-decoration:none; color:white;" href="/"><span class="largenav">B2B Ecommerce </span></a></h2>
+                <h2 style="margin:0px;"><a style="text-decoration:none; color:white;" href="/"><span class="largenav">Hamro Dairy </span></a></h2>
             </div>
 
             <div class="navbar-search smallsearch col-sm-7 col-xs-11">
@@ -306,45 +306,7 @@ body {
 {% endblock content %}
 <!-- content end-->
 <br><br><br>
-<footer>
-  <br>
-
-  <p>
-    <a href="#" class="fa fa-facebook"></a>
-    <a href="#" class="fa fa-whatsapp"></a>
-    <a href="#" class="fa fa-instagram"></a>
-    <a href="#" class="fa fa-twitter"></a>
-  </p>
-
-  <br>
-  <div class="container">
-    <div class="row">
-      <div class="col-md-12 col-sm-12">
-        <div style="color:#ffffff;" class="wow fadeInUp footer-copyright">
-          <p>Ecommerce Site in Python using Django Framework<br>
-            &copy; 2025 Developed By Pujan Shrestha </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</footer>
-<script>
-$(document).ready(function(){
-
-function openNav() {
-document.getElementById("mySidenav").style.width = "70%";
-
-document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
-}
-
-function closeNav() {
-document.getElementById("mySidenav").style.width = "0";
-document.body.style.backgroundColor = "rgba(0,0,0,0)";
-}
-
-
-});
-</script>
+{% include 'ecom/footer.html' %}
 
 </body>
 </html>
