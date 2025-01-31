@@ -1,140 +1,66 @@
 {% extends 'ecom/customer_base.html' %}
 {% load static %}
 {% block content %}
-<head>
-  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
-  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
-  <style>
-    .cart-container {
-      max-width: 900px;
-      margin: 40px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .cart-header {
-      background: black;
-      color: white;
-      padding: 15px;
-      border-radius: 10px 10px 0 0;
-      text-align: center;
-      font-size: 22px;
-      font-weight: bold;
-    }
-    .cart-table {
-      margin-top: 10px;
-    }
-    .cart-table th, .cart-table td {
-      text-align: center;
-      vertical-align: middle !important;
-      padding: 12px !important;
-    }
-    .product-image {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 5px;
-    }
-    .product-name {
-      font-weight: 600;
-      color: #333;
-    }
-    .btn-remove {
-      padding: 5px 10px;
-      font-size: 14px;
-      transition: 0.3s;
-    }
-    .btn-remove:hover {
-      background: #dc3545;
-    }
-    .total-row {
-      font-size: 18px;
-      font-weight: bold;
-      background: #f1f1f1;
-    }
-    .checkout-container {
-      text-align: right;
-      margin-top: 20px;
-    }
-    .btn-checkout {
-      padding: 12px 25px;
-      font-size: 16px;
-      background: #28a745;
-      color: white;
-      border-radius: 5px;
-      transition: 0.3s;
-    }
-    .btn-checkout:hover {
-      background: #218838;
-    }
-    .empty-cart {
-      text-align: center;
-      padding: 40px 20px;
-      font-size: 20px;
-      color: #6c757d;
-    }
-  </style>
-</head>
 
-<div class="container cart-container">
-  <div class="cart-header">My Cart</div>
-  
-  {% if products %}
-  <div class="table-responsive">
-    <table class="table table-bordered cart-table">
-      <thead class="bg-light">
-        <tr>
-          <th>SN</th>
-          <th>Name</th>
-          <th>Image</th>
-          <th>Price</th>
-          <th>Quantity</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in products %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td class="product-name">{{ p.name }}</td>
-            <td>
-              <img src="{% static p.product_image.url %}" alt="{{ p.name }}" class="product-image">
-            </td>
-            <td>Rs. {{ p.price }}</td>
-            <td>{{ p.quantity }} {{ p.unit }}</td>
-            <td>
-              <a class="btn btn-danger btn-remove" href="{% url 'remove-from-cart' p.id %}">
-                <span class="glyphicon glyphicon-trash"></span> Remove
-              </a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr class="total-row">
-          <td colspan="4">Total</td>
-          <td colspan="2">Rs. {{ total }}</td>
-        </tr>
-      </tfoot>
-    </table>
+
+<div class="container py-5">
+  <div class="card shadow-sm rounded">
+    <div class="card-header text-center bg-dark text-white fs-4">
+      My Cart
+    </div>
+
+    {% if products %}
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">SN</th>
+              <th scope="col">Name</th>
+              <th scope="col">Image</th>
+              <th scope="col">Price</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in products %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="fw-semibold">{{ p.name }}</td>
+                <td>
+                  <img src="{% static p.product_image.url %}" alt="{{ p.name }}" class="img-fluid rounded-3" style="max-width: 60px; max-height: 60px; object-fit: cover;">
+                </td>
+                <td>Rs. {{ p.price }}</td>
+                <td>{{ p.quantity }} {{ p.unit }}</td>
+                <td>
+                  <a class="btn btn-danger btn-sm" href="{% url 'remove-from-cart' p.id %}" role="button">
+                    <i class="bi bi-trash"></i> Remove
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr class="fw-semibold bg-light">
+              <td colspan="4" class="text-end">Total</td>
+              <td colspan="2">Rs. {{ total }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-end mt-3">
+        <a href="/customer-address" class="btn btn-success btn-lg">
+          <i class="bi bi-cart-plus"></i> Proceed to Checkout
+        </a>
+      </div>
+
+    {% else %}
+      <div class="alert alert-info text-center mt-4" role="alert">
+        <i class="bi bi-cart-x"></i> Your cart is empty!
+      </div>
+    {% endif %}
   </div>
-  
-  <div class="checkout-container">
-    <a href="/customer-address">
-      <button class="btn btn-success btn-checkout">
-        <span class="glyphicon glyphicon-shopping-cart"></span> Proceed to Checkout
-      </button>
-    </a>
-  </div>
-  
-  {% else %}
-  <div class="empty-cart">
-    <h4>
-      <span class="glyphicon glyphicon-shopping-cart"></span>
-      Your cart is empty!
-    </h4>
-  </div>
-  {% endif %}
 </div>
+
 {% endblock content %}

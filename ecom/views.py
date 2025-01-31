@@ -467,18 +467,29 @@ def remove_from_cart_view(request, pk):
 @user_passes_test(is_customer)
 def customer_home_view(request):
     products = models.Product.objects.all()
+    out_of_stock_products = []
+    in_stock_products = []
+
+    for product in products:
+        if models.Orders.objects.filter(product=product).exists():
+            out_of_stock_products.append(product)
+        else:
+            in_stock_products.append(product)
+
+    product_count_in_cart = 0
     if "product_ids" in request.COOKIES:
         product_ids = request.COOKIES["product_ids"]
-        counter = product_ids.split("|")
-        product_count_in_cart = len(set(counter))
-    else:
-        product_count_in_cart = 0
+        product_count_in_cart = len(set(product_ids.split("|")))
+
     return render(
         request,
         "ecom/customer_home.html",
-        {"products": products, "product_count_in_cart": product_count_in_cart},
+        {
+            "in_stock_products": in_stock_products,
+            "out_of_stock_products": out_of_stock_products,
+            "product_count_in_cart": product_count_in_cart,
+        },
     )
-
 
 # shipment address before placing order
 @login_required(login_url="customerlogin")
