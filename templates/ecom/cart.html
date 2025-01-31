@@ -2,76 +2,56 @@
 {% load static %}
 {% block content %}
 <head>
-  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
   <style>
     .cart-container {
-      max-width: 1000px;
-      margin: 30px auto;
+      max-width: 900px;
+      margin: 40px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     .cart-header {
-      background: #333;
+      background: black;
       color: white;
       padding: 15px;
-      border-radius: 5px 5px 0 0;
-      margin-bottom: 0;
-    }
-    .cart-title {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 600;
+      border-radius: 10px 10px 0 0;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
     }
     .cart-table {
-      background: white;
-      border-radius: 0 0 5px 5px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 10px;
     }
-    .cart-table thead {
-      background: #f8f9fa;
-    }
-    .cart-table th {
-      font-weight: 600;
-      padding: 15px !important;
-      border-bottom: 2px solid #ddd !important;
-    }
-    .cart-table td {
+    .cart-table th, .cart-table td {
+      text-align: center;
       vertical-align: middle !important;
-      padding: 15px !important;
+      padding: 12px !important;
     }
     .product-image {
-      width: 70px;
-      height: 70px;
+      width: 60px;
+      height: 60px;
       object-fit: cover;
       border-radius: 5px;
-      border: 1px solid #eee;
     }
     .product-name {
       font-weight: 600;
       color: #333;
     }
-    .product-price {
-      font-size: 16px;
-      color: #2c3e50;
-      font-weight: 600;
-    }
     .btn-remove {
-      padding: 6px 12px;
-      border-radius: 4px;
-      transition: all 0.3s ease;
+      padding: 5px 10px;
+      font-size: 14px;
+      transition: 0.3s;
     }
     .btn-remove:hover {
-      background: #c82333;
+      background: #dc3545;
     }
     .total-row {
-      font-weight: 600;
       font-size: 18px;
-      background: #f8f9fa;
-    }
-    .total-cell {
-      text-align: center;
-      font-size: 20px;
-      font-weight: 700;
-      color:black;
+      font-weight: bold;
+      background: #f1f1f1;
     }
     .checkout-container {
       text-align: right;
@@ -79,55 +59,50 @@
     }
     .btn-checkout {
       padding: 12px 25px;
-      font-size: 18px;
+      font-size: 16px;
+      background: #28a745;
       color: white;
-      background-color: #218838;
-      border: none;
       border-radius: 5px;
-      transition: all 0.3s ease;
+      transition: 0.3s;
     }
     .btn-checkout:hover {
-      background-color: #1e7e34;
+      background: #218838;
     }
     .empty-cart {
       text-align: center;
       padding: 40px 20px;
-      background: white;
-      border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .empty-cart h4 {
+      font-size: 20px;
       color: #6c757d;
-      font-size: 24px;
-      margin: 0;
     }
   </style>
 </head>
 
 <div class="container cart-container">
-  <div class="cart-header">
-    <h4 class="cart-title text-center">My Cart</h4>
-  </div>
+  <div class="cart-header">My Cart</div>
   
   {% if products %}
-  <div class="table-responsive cart-table">
-    <table class="table table-hover">
-      <thead>
+  <div class="table-responsive">
+    <table class="table table-bordered cart-table">
+      <thead class="bg-light">
         <tr>
+          <th>SN</th>
           <th>Name</th>
           <th>Image</th>
           <th>Price</th>
+          <th>Quantity</th>
           <th>Action</th>
         </tr>
       </thead>
       <tbody>
         {% for p in products %}
           <tr>
+            <td>{{ forloop.counter }}</td>
             <td class="product-name">{{ p.name }}</td>
             <td>
               <img src="{% static p.product_image.url %}" alt="{{ p.name }}" class="product-image">
             </td>
-            <td class="product-price">Rs.{{ p.price }}</td>
+            <td>Rs. {{ p.price }}</td>
+            <td>{{ p.quantity }} {{ p.unit }}</td>
             <td>
               <a class="btn btn-danger btn-remove" href="{% url 'remove-from-cart' p.id %}">
                 <span class="glyphicon glyphicon-trash"></span> Remove
@@ -138,8 +113,8 @@
       </tbody>
       <tfoot>
         <tr class="total-row">
-          <td colspan="3" class="total-cell">Total</td>
-          <td class="total-cell">Rs.{{ total }}</td>
+          <td colspan="4">Total</td>
+          <td colspan="2">Rs. {{ total }}</td>
         </tr>
       </tfoot>
     </table>
@@ -147,7 +122,7 @@
   
   <div class="checkout-container">
     <a href="/customer-address">
-      <button class="btn btn-success btn-lg btn-checkout">
+      <button class="btn btn-success btn-checkout">
         <span class="glyphicon glyphicon-shopping-cart"></span> Proceed to Checkout
       </button>
     </a>
