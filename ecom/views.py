@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 
 
+
 def increase_quantity(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     product.quantity += 1
@@ -48,39 +49,46 @@ def adminclick_view(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect("afterlogin")
     return HttpResponseRedirect("adminlogin")
-
-
 def customer_signup_view(request):
     # Instantiate the forms
     userForm = forms.CustomerUserForm()
     customerForm = forms.CustomerForm()
-    mydict = {"userForm": userForm, "customerForm": customerForm}
-    
+    context = {"userForm": userForm, "customerForm": customerForm}
+
     # Check if the request is POST (form submission)
     if request.method == "POST":
         userForm = forms.CustomerUserForm(request.POST)
         customerForm = forms.CustomerForm(request.POST, request.FILES)
-        
+
         if userForm.is_valid() and customerForm.is_valid():
-            # Save the user data and set password (from the form input)
-            user = userForm.save()
-            user.set_password(user.password)  # Ensure the password is hashed
-            user.save()
-            
-            # Save the customer data without committing (so we can assign the user)
-            customer = customerForm.save(commit=False)
-            customer.user = user  # Link the user to the customer profile
-            customer.save()
+            username = userForm.cleaned_data.get('username')
+            email = userForm.cleaned_data.get('email')
 
-            # Add user to the "CUSTOMER" group
-            my_customer_group = Group.objects.get_or_create(name="CUSTOMER")
-            my_customer_group[0].user_set.add(user)
+            # Check if username or email already exists
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "Username already exists.")
+           
+            else:
+                # Save the user data and set password (from the form input)
+                user = userForm.save()
+                user.set_password(user.password)  # Ensure the password is hashed
+                user.save()
 
-            # Redirect to login after successful signup
-            return HttpResponseRedirect("customerlogin")
-    
+                # Save the customer data without committing (so we can assign the user)
+                customer = customerForm.save(commit=False)
+                customer.user = user  # Link the user to the customer profile
+                customer.save()
+
+                # Add user to the "CUSTOMER" group
+                my_customer_group = Group.objects.get_or_create(name="CUSTOMER")
+                my_customer_group[0].user_set.add(user)
+
+                # Add success message
+                messages.success(request, "Account created successfully!")
+                return redirect('customerlogin')  # Use the 'redirect' method with the named URL
+
     # Render the signup page with form data
-    return render(request, "ecom/customersignup.html", context=mydict)
+    return render(request, "ecom/customersignup.html", context)
 
 
 # -----------for checking user iscustomer
@@ -305,11 +313,7 @@ def update_order_view(request, pk):
     return render(request, "ecom/update_order.html", {"orderForm": orderForm})
 
 
-# admin view the feedback
-@login_required(login_url="adminlogin")
-def view_feedback_view(request):
-    feedbacks = models.Feedback.objects.all().order_by("-id")
-    return render(request, "ecom/view_feedback.html", {"feedbacks": feedbacks})
+
 
 
 # ---------------------------------------------------------------------------------
@@ -351,41 +355,32 @@ def search_view(request):
 
 
 # any one can add product to cart, no need of signin
-@login_required(login_url="customerlogin")
+
 def add_to_cart_view(request, pk):
-    products = models.Product.objects.all()
+    """
+    Adds a product to the cart. If the user is not authenticated, they are redirected to the login page.
+    Ensures no duplicate product IDs are stored in cookies.
+    """
 
-    # for cart counter, fetching products ids added by customer from cookies
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        counter = product_ids.split("|")
-        product_count_in_cart = len(set(counter))
-    else:
-        product_count_in_cart = 1
+    # Check if user is authenticated, otherwise redirect to login page
+    if not request.user.is_authenticated:
+        return redirect("customerlogin")
 
-    response = render(
-        request,
-        "ecom/index.html",
-        {"products": products, "product_count_in_cart": product_count_in_cart},
-    )
+    # Retrieve existing product IDs from cookies
+    product_ids = request.COOKIES.get("product_ids", "")
+    product_id_list = product_ids.split("|") if product_ids else []
 
-    # adding product id to cookies
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        if product_ids == "":
-            product_ids = str(pk)
-        else:
-            product_ids = product_ids + "|" + str(pk)
-        response.set_cookie("product_ids", product_ids)
-    else:
-        response.set_cookie("product_ids", pk)
+    # Avoid adding duplicates
+    if str(pk) not in product_id_list:
+        product_id_list.append(str(pk))
 
-    product = models.Product.objects.get(id=pk)
-    messages.info(request, product.name + " added to cart successfully!")
+    # Prepare response with redirection to customer home
+    response = redirect("customer-home")
+
+    # Update cookies with new cart data
+    response.set_cookie("product_ids", "|".join(product_id_list))
 
     return response
-
-
 # for checkout of cart
 def cart_view(request):
     # for cart counter
@@ -462,14 +457,7 @@ def remove_from_cart_view(request, pk):
         return response
 
 
-def send_feedback_view(request):
-    feedbackForm = forms.FeedbackForm()
-    if request.method == "POST":
-        feedbackForm = forms.FeedbackForm(request.POST)
-        if feedbackForm.is_valid():
-            feedbackForm.save()
-            return render(request, "ecom/feedback_sent.html")
-    return render(request, "ecom/send_feedback.html", {"feedbackForm": feedbackForm})
+
 
 
 # ---------------------------------------------------------------------------------
@@ -697,7 +685,6 @@ def edit_profile_view(request):
         customerForm = forms.EditCustomerForm(instance=customer)
 
     return render(request, "ecom/edit_profile.html", {"userForm": userForm, "customerForm": customerForm})
-
 # ---------------------------------------------------------------------------------
 # ------------------------ ABOUT US AND CONTACT US VIEWS START --------------------
 # ---------------------------------------------------------------------------------
@@ -706,19 +693,4 @@ def aboutus_view(request):
 
 
 def contactus_view(request):
-    sub = forms.ContactusForm()
-    if request.method == "POST":
-        sub = forms.ContactusForm(request.POST)
-        if sub.is_valid():
-            email = sub.cleaned_data["Email"]
-            name = sub.cleaned_data["Name"]
-            message = sub.cleaned_data["Message"]
-            send_mail(
-                str(name) + " || " + str(email),
-                message,
-                settings.EMAIL_HOST_USER,
-                settings.EMAIL_RECEIVING_USER,
-                fail_silently=False,
-            )
-            return render(request, "ecom/contactussuccess.html")
-    return render(request, "ecom/contactus.html", {"form": sub})
+    return render(request, "ecom/contactus.html")

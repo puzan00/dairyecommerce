@@ -34,18 +34,26 @@
       color: var(--text-light) !important;
       letter-spacing: 0.5px;
     }
-
+  
     .nav-item .nav-link {
       color: var(--text-light) !important;
       font-weight: 500;
       padding: 0.5rem 1.2rem;
       transition: all 0.3s ease;
     }
-
+  
     .nav-item .nav-link:hover {
       color: var(--accent-color) !important;
       background-color: rgba(255,255,255,0.1);
       border-radius: 4px;
+    }
+  
+    .navbar-nav .nav-item {
+      margin-right: 20px; /* Adds space between navbar items */
+    }
+  
+    .navbar-nav .nav-item:last-child {
+      margin-right: 0; /* Removes margin from the last item */
     }
 
     .content-wrapper {
@@ -59,6 +67,7 @@
       padding: 0.5rem 1.2rem;
       border-radius: 4px;
       transition: all 0.3s ease;
+      margin-left: 20px;
     }
 
     .btn-logout:hover {

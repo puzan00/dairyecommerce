@@ -45,11 +45,12 @@ body {
 }
 
 .el-wrapper {
-  width: 360px;
+  width: 340px;
   padding: 15px;
   margin: 15px auto;
   background-color: #fff;
   border-radius: 15px;
+  
 }
 
 @media (max-width: 991px) {
@@ -414,7 +415,7 @@ img {
 
       {% for p in products %}
       <!-- card1 -->
-      <div class="column">
+      <div class="col-md-4 mb-4 me-3">
       <div class="container page-wrapper" style="width: 450px;">
         <div class="page-inner">
           <div class="row">
@@ -453,7 +454,7 @@ img {
 
     <div class="row">
 
-          <br><br><br><br><br>
+    
 {% endif %}
   {% endfor %}
 </div>
@@ -469,10 +470,6 @@ img {
     {%endfor%}
     {%endif%}
 </script>
-<br><br><br>
-<br><br><br><br><br><br><br><br><br><br><br><br>
-
-
 
 
 {% endblock content %}

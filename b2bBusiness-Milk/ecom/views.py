@@ -310,18 +310,21 @@ def search_view(request):
     )
 
 
-# any one can add product to cart, no need of signin
-@login_required(login_url="customerlogin")
+
+
 def add_to_cart_view(request, pk):
+    if not request.user.is_authenticated:
+        return redirect('customerlogin')  # Redirect to the login page if the user is not authenticated
+    
     products = models.Product.objects.all()
 
-    # for cart counter, fetching products ids added by customer from cookies
+    # Fetching product ids added by the customer from cookies
     if "product_ids" in request.COOKIES:
         product_ids = request.COOKIES["product_ids"]
         counter = product_ids.split("|")
-        product_count_in_cart = len(set(counter))
+        product_count_in_cart = len(set(counter))  # Count unique product ids
     else:
-        product_count_in_cart = 1
+        product_count_in_cart = 0  # No items in the cart initially
 
     response = render(
         request,
@@ -329,7 +332,7 @@ def add_to_cart_view(request, pk):
         {"products": products, "product_count_in_cart": product_count_in_cart},
     )
 
-    # adding product id to cookies
+    # Adding the product id to cookies
     if "product_ids" in request.COOKIES:
         product_ids = request.COOKIES["product_ids"]
         if product_ids == "":
@@ -339,9 +342,6 @@ def add_to_cart_view(request, pk):
         response.set_cookie("product_ids", product_ids)
     else:
         response.set_cookie("product_ids", pk)
-
-    product = models.Product.objects.get(id=pk)
-    messages.info(request, product.name + " added to cart successfully!")
 
     return response
 
