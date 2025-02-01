@@ -1,97 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Corrected Font Awesome CDN for version 6 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
   <style>
-    /* General Styles */
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+    /* Custom CSS for consistent footer */
+    body {
       display: flex;
       flex-direction: column;
-      font-family: Arial, sans-serif;
+      min-height: 100vh;
     }
-
-    /* Main Content Styles */
-    .content {
-      flex: 1; /* Ensures content takes up available space */
-      padding: 20px;
+    
+    main {
+      flex: 1 0 auto;
     }
-
-    /* Footer Styles */
+    
     footer {
-      background-color: #34495e;
-      padding: 40px 0; /* Changed from rem to px */
-      width: 100%;
-      text-align: center;
-      flex-shrink: 0; /* Prevent the footer from shrinking */
+      flex-shrink: 0;
     }
-
-    .social-links {
-      display: flex;
-      justify-content: center;
-      gap: 16px; /* Changed from rem to px */
-      margin-bottom: 16px; /* Changed from rem to px */
+    
+    /* Set fixed heights for footer elements */
+    .footer-content {
+      min-height: 200px;
     }
-
-    .social-links a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: rgba(255,255,255,0.1);
-      color: #ecf0f1;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      font-size: 20px; /* Reduced font size */
-    }
-
-    .social-links a:hover {
-      transform: translateY(-2px);
-      background-color: #3498db;
-    }
-
-    .footer-copyright {
-      color: #ecf0f1;
-      text-align: center;
-      font-size: 12px; /* Reduced font size */
-      padding-top: 10px;
-    }
-
-    footer .footer-copyright p {
-      margin: 0;
+    
+    .footer-bottom {
+      min-height: 60px;
     }
   </style>
-</head>
-<body>
 
-  <!-- Content Section -->
-  <div class="content">
-    <!-- Main content goes here -->
-  </div>
 
   <!-- Footer Section -->
-  <footer>
-    <div class="social-links">
-      <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-      <a href="#" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-      <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-      <a href="#" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
-    </div>
-
-    <div class="footer-copyright">
-      <p>
-        E-commerce Site in Python using Django Framework<br>
-        &copy; 2025 Developed by Pujan Shrestha
-      </p>
+  <footer class="bg-dark text-light py-4">
+    <div class="container">
+      <div class="row footer-content">
+        <div class="col-md-4 mb-3 mb-md-0">
+          <h5 class="mb-3">About Hamro Dairy</h5>
+          <p class="small">Hamro Dairy is your one-stop shop for fresh, high-quality dairy products. We're committed to delivering the best to your doorstep.</p>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+          <h5 class="mb-3">Newsletter</h5>
+          <form>
+            <div class="input-group mb-3">
+              <input type="email" class="form-control" placeholder="Enter your email" aria-label="Enter your email" aria-describedby="button-addon2">
+              <button class="btn btn-outline-light" type="button" id="button-addon2">Subscribe</button>
+            </div>
+          </form>
+        </div>
+        <div class="col-md-4">
+          <h5 class="mb-3">Connect With Us</h5>
+          <div class="d-flex justify-content-center justify-content-md-start mb-3">
+            <a href="#" class="text-light me-3" aria-label="Facebook"><i class="fab fa-facebook-f fa-lg"></i></a>
+            <a href="#" class="text-light me-3" aria-label="WhatsApp"><i class="fab fa-whatsapp fa-lg"></i></a>
+            <a href="#" class="text-light me-3" aria-label="Instagram"><i class="fab fa-instagram fa-lg"></i></a>
+            <a href="#" class="text-light" aria-label="Twitter"><i class="fab fa-twitter fa-lg"></i></a>
+          </div>
+        </div>
+      </div>
+      <hr class="my-4 bg-light">
+      <div class="row footer-bottom d-flex align-items-center">
+        <div class="col-md-6 text-center text-md-start">
+          <p class="small mb-0">&copy; {% now "Y" %} Hamro Dairy. All rights reserved.</p>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <a href="#" class="text-light text-decoration-none small me-3">Privacy Policy</a>
+          <a href="#" class="text-light text-decoration-none small me-3">Terms of Service</a>
+          <span class="small">Developed by Pujan Shrestha</span>
+        </div>
+      </div>
     </div>
   </footer>
-
-</body>
-</html>

@@ -43,12 +43,12 @@
               <td class="px-3">
                 <div class="d-flex align-items-center">
                   <div class="me-3">
-                    <img src="{% static c.profile_pic.url %}" 
-                         class="rounded-circle border" 
-                         alt="{{ c.get_name }}" 
-                         width="35" 
-                         height="35"
-                         style="object-fit: cover;" />
+                    <img src="{{ c.profile_pic.url }}" 
+                    class="rounded-circle border" 
+                    alt="{{ c.get_name }}" 
+                    width="35" 
+                    height="35"
+                    style="object-fit: cover;" />
                   </div>
                   <div>
                     <h6 class="mb-0">{{ c.get_name }}</h6>

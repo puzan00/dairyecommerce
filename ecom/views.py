@@ -9,7 +9,7 @@ from django.conf import settings
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-
+from django.contrib.auth import logout
 
 
 def increase_quantity(request, product_id):
@@ -29,20 +29,16 @@ def decrease_quantity(request, product_id):
 
 def home_view(request):
     products = models.Product.objects.all()
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        counter = product_ids.split("|")
-        product_count_in_cart = len(set(counter))
-    else:
-        product_count_in_cart = 0
+
+    # Remove the logic for counting products in cart
     if request.user.is_authenticated:
         return HttpResponseRedirect("afterlogin")
+
     return render(
         request,
         "ecom/index.html",
-        {"products": products, "product_count_in_cart": product_count_in_cart},
+        {"products": products},  # Remove product_count_in_cart from context
     )
-
 
 # for showing login button for admin(by pujan)
 def adminclick_view(request):
@@ -103,7 +99,9 @@ def afterlogin_view(request):
     else:
         return redirect("admin-dashboard")
 
-
+def logout_view(request):
+    logout(request)
+    return redirect('customerlogin')
 # ---------------------------------------------------------------------------------
 # ------------------------ ADMIN RELATED VIEWS START ------------------------------
 # ---------------------------------------------------------------------------------
@@ -382,7 +380,13 @@ def add_to_cart_view(request, pk):
 
     return response
 # for checkout of cart
+from django.shortcuts import redirect
+
 def cart_view(request):
+    # Check if the user is authenticated, if not redirect to login page
+    if not request.user.is_authenticated:
+        return redirect("customerlogin")  # Redirect to the login page
+
     # for cart counter
     if "product_ids" in request.COOKIES:
         product_ids = request.COOKIES["product_ids"]
@@ -403,6 +407,7 @@ def cart_view(request):
             # for total price shown in cart
             for p in products:
                 total = total + p.price
+
     return render(
         request,
         "ecom/cart.html",
@@ -614,18 +619,6 @@ def my_order_view(request):
     )
 
 
-# @login_required(login_url='customerlogin')
-# @user_passes_test(is_customer)
-# def my_order_view2(request):
-
-#     products=models.Product.objects.all()
-#     if 'product_ids' in request.COOKIES:
-#         product_ids = request.COOKIES['product_ids']
-#         counter=product_ids.split('|')
-#         product_count_in_cart=len(set(counter))
-#     else:
-#         product_count_in_cart=0
-#     return render(request,'ecom/my_order.html',{'products':products,'product_count_in_cart':product_count_in_cart})
 
 
 # --------------for discharge customer bill (pdf) download and printing
@@ -669,7 +662,14 @@ def download_invoice_view(request, orderID, productID):
 @login_required(login_url="customerlogin")
 @user_passes_test(is_customer)
 def my_profile_view(request):
-    customer = models.Customer.objects.get(user_id=request.user.id)
+    try:
+        # Attempt to get the customer associated with the logged-in user
+        customer = models.Customer.objects.get(user_id=request.user.id)
+    except models.Customer.DoesNotExist:
+        # If no customer is found, raise an error or redirect to another page
+        raise Http404("Customer not found")
+
+    # Return the profile page with the customer object
     return render(request, "ecom/my_profile.html", {"customer": customer})
 @login_required(login_url='customerlogin')
 def edit_profile_view(request):
@@ -699,8 +699,6 @@ def edit_profile_view(request):
 # ---------------------------------------------------------------------------------
 # ------------------------ ABOUT US AND CONTACT US VIEWS START --------------------
 # ---------------------------------------------------------------------------------
-def aboutus_view(request):
-    return render(request, "ecom/aboutus.html")
 
 
 def contactus_view(request):

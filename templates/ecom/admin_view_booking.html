@@ -70,11 +70,11 @@
               <td>{{ p.name }}</td>
               <td>
                 <span class="badge bg-light text-dark">
-                  {{ p.quantity }} {{p.unit}}
+                  {{ p.quantity }} {{ p.unit }}
                 </span>
               </td>
               <td>
-                <img src="{% static p.product_image.url %}" 
+                <img src="{{ p.product_image.url }}" 
                      class="rounded-3 border" 
                      alt="{{ p.name }}" 
                      height="40" 
@@ -207,4 +207,5 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+
 {% endblock content %}

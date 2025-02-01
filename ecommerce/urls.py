@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from ecom import views
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView 
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -9,8 +9,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.home_view, name=""),
     path("afterlogin", views.afterlogin_view, name="afterlogin"),
-    path("logout", LogoutView.as_view(template_name="ecom/customerlogin.html"), name="logout"),
-    path("aboutus", views.aboutus_view),
+    path('logout/', views.logout_view, name='logout'),
     path("contactus", views.contactus_view, name="contactus"),
     path("search", views.search_view, name="search"),
     

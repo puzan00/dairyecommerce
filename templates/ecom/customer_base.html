@@ -1,31 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hamro Dairy</title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .product-image-container {
+            height: 200px;
+            overflow: hidden;
+        }
+        .product-image-container img {
+            object-fit: cover;
+            height: 100%;
+            width: 100%;
+        }
+        .navbar-nav.navbar-center {
+            position: absolute;
+            left: 50%;
+            transform: translatex(-50%);
+        }
+        @media (max-width: 991px) {
+            .navbar-nav.navbar-center {
+                position: static;
+                transform: none;
+            }
+        }
+    </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">Hamro Dairy</a>
+            <a class="navbar-brand" href="/"><i class="fas fa-cow me-2"></i>Hamro Dairy</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/my-order">Track Orders</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/my-profile">Profile</a></li>
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/my-order"><i class="fas fa-truck me-1"></i>Track Orders</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/my-profile"><i class="fas fa-user me-1"></i>Profile</a></li>
+                </ul>
+                <ul class="navbar-nav navbar-center">
                     <li class="nav-item">
-                        <form action="/logout" method="post" class="d-inline">
+                        <form action="/search" method="get" class="d-flex">
+                            <input type="search" class="form-control me-2" placeholder="Search products" name="query" id="query">
+                            <button class="btn btn-outline-light" type="submit"><i class="fas fa-search"></i></button>
+                        </form>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="/cart" class="btn btn-warning me-2">
+                            <i class="fas fa-shopping-cart"></i> Cart <span class="badge bg-dark">{{ product_count_in_cart }}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <form action="/logout/" method="post" class="d-inline">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-link nav-link">Logout</button>
+                            <button type="submit" class="btn btn-outline-light"><i class="fas fa-sign-out-alt me-1"></i>Logout</button>
                         </form>
                     </li>
                 </ul>
@@ -33,30 +76,16 @@
         </div>
     </nav>
 
-    <!-- Search Bar -->
-    <div class="container mt-3">
-        <form action="/search" method="get" class="input-group">
-            <input type="search" class="form-control" placeholder="Search for Products, Brands and more" name="query" id="query">
-            <button class="btn btn-warning" type="submit"><i class="fa fa-search"></i></button>
-        </form>
-    </div>
-
-    <!-- Cart Button -->
-    <div class="container mt-3 text-end">
-        <a href="/cart" class="btn btn-warning">
-            <i class="fa fa-shopping-cart"></i> Cart <span class="badge bg-dark">{{ product_count_in_cart }}</span>
-        </a>
-    </div>
-
-    <!-- Content Block -->
-    <div class="container mt-4">
+    <!-- Main Content -->
+    <main class="flex-grow-1">
         {% block content %}
         {% endblock content %}
-    </div>
+    </main>
 
     {% include 'ecom/footer.html' %}
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap 5.3 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

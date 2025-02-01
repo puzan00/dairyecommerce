@@ -1,50 +1,148 @@
-<!DOCTYPE html>
+{% extends 'ecom/homebase.html' %}
 {% load widget_tweaks %}
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>B2B Ecommerce</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  </head>
-  <body class="bg-light">
-    {% include "ecom/navbar.html" %}
+{% load static %}
 
-    <section>
-      <!-- Background image -->
-      <div class="p-5" style="background-image: url('https://mdbootstrap.com/img/new/textures/full/171.jpg'); height: 300px; background-size: cover; background-position: center;"></div>
-
-      <!-- Login Form Card -->
-      <div class="card mx-auto mt-n5" style="max-width: 500px; border-radius: 15px; box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1); padding: 2rem;">
-        <h2 class="h3 text-center mb-4 font-weight-bold">Customer Login</h2>
-        <form method="post">
-          {% csrf_token %}
-          
-          <!-- Username input -->
-          <div class="form-group">
-            {% render_field form.username class="form-control" placeholder="Username" autocomplete="off" %}
+{% block content %}
+<section class="vh-100 d-flex align-items-center justify-content-center" style="background-image: url('{% static 'images/loginpage.jpg' %}'); background-size: cover; background-position: center;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6">
+        <div class="card border-0 shadow-lg bg-white bg-opacity-90 transition-card">
+          <div class="card-body p-5">
+            <div class="text-center mb-4">
+              <h2 class="h3 fw-bold">Welcome Back!</h2>
+              <p class="text-muted">Please login to your account</p>
+            </div>
+            
+            <form method="post" id="loginForm">
+              {% csrf_token %}
+              
+              {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                  {% for error in form.non_field_errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              
+              <!-- Username input -->
+              <div class="form-floating mb-3">
+                {% render_field form.username class="form-control" id="floatingUsername" placeholder="Username" autocomplete="off" %}
+                <label for="floatingUsername">Username</label>
+                {% if form.username.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.username.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              
+              <!-- Password input -->
+              <div class="form-floating mb-3">
+                {% render_field form.password class="form-control" id="floatingPassword" placeholder="Password" %}
+                <label for="floatingPassword">Password</label>
+                {% if form.password.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.password.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              
+              <!-- Remember me checkbox -->
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="rememberMe">
+                <label class="form-check-label" for="rememberMe">
+                  Remember me
+                </label>
+              </div>
+              
+              <!-- Submit button -->
+              <div class="d-grid mb-4">
+                <button type="submit" class="btn btn-primary btn-lg">Login</button>
+              </div>
+            </form>
           </div>
-          
-          <!-- Password input -->
-          <div class="form-group">
-            {% render_field form.password class="form-control" placeholder="Password" %}
-          </div>
-          
-          <!-- Submit button -->
-          <button type="submit" class="btn btn-primary btn-block">Login</button>
-
-         
-        </form>
+        </div>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
 
-    {% include "ecom/footer.html" %}
-    
-    <!-- Bootstrap JS (Optional for interactive elements like dropdowns, modals, etc.) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  </body>
-</html>
+<style>
+  .transition-card {
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    opacity: 0.9;
+  }
+
+  .transition-card:hover {
+    transform: translateY(-10px);
+  }
+
+  .card {
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .btn-primary {
+    background-color: #1877f2;
+    border-color: #1877f2;
+  }
+  
+  .btn-primary:hover {
+    background-color: #166fe5;
+    border-color: #166fe5;
+  }
+  
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #1877f2;
+  }
+  
+  .form-control:focus {
+    border-color: #1877f2;
+    box-shadow: 0 0 0 0.25rem rgba(24, 119, 242, 0.25);
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get form elements
+    const usernameInput = document.getElementById('floatingUsername');
+    const rememberMeCheckbox = document.getElementById('rememberMe');
+    const loginForm = document.getElementById('loginForm');
+
+    // Check if there's a saved username in localStorage
+    const savedUsername = localStorage.getItem('rememberedUsername');
+    if (savedUsername) {
+        usernameInput.value = savedUsername;
+        rememberMeCheckbox.checked = true;
+    }
+
+    // Add form submit event listener
+    loginForm.addEventListener('submit', function() {
+        if (rememberMeCheckbox.checked) {
+            // Save username if "Remember me" is checked
+            localStorage.setItem('rememberedUsername', usernameInput.value);
+        } else {
+            // Remove saved username if "Remember me" is unchecked
+            localStorage.removeItem('rememberedUsername');
+        }
+    });
+
+    // Add change event listener to checkbox
+    rememberMeCheckbox.addEventListener('change', function() {
+        if (!this.checked) {
+            // Remove saved username when unchecking "Remember me"
+            localStorage.removeItem('rememberedUsername');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -42,7 +42,7 @@
                             <td>{{ p.name }}</td>
                             <td>
                                 {% if p.product_image %}
-                                <img src="{% static p.product_image.url %}" 
+                                <img src="{{ p.product_image.url }}" 
                                      alt="Product image of {{ p.name }}"
                                      class="img-thumbnail"
                                      style="max-width: 50px; height: auto;" />

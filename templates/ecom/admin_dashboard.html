@@ -88,7 +88,8 @@
                   </td>
                   <td>{{ product.name }}</td>
                   <td>
-                    <img src="{% static product.product_image.url %}" class="rounded" alt="Product Image" height="40px" width="40px" />
+                  <img src="{{ product.product_image.url }}" class="rounded" alt="Product Image" height="40px" width="40px" />
+
                   </td>
                   <td>
                     {% if order.status == 'Pending' %}
