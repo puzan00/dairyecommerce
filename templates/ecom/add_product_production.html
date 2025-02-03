@@ -1,0 +1,42 @@
+{% extends 'ecom/admin_base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Add Production</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'add-product-production' %}">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="product">Select Product</label>
+                    <select class="form-control" name="product" id="product" required>
+                        {% for product in products %}
+                            <option value="{{ product.id }}" {% if product.id == selected_product.id %}selected{% endif %}>{{ product.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quantity_produced">Quantity Produced</label>
+                    <input type="number" step="0.01" class="form-control" id="quantity_produced" name="quantity_produced" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="unit">Unit</label>
+                    <input type="text" class="form-control" id="unit" value="{{ selected_product.unit }}" readonly required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="production_date">Date of Production</label>
+                    <input type="date" class="form-control" id="production_date" name="production_date" required>
+                </div>
+                
+                <button type="submit" class="btn btn-success">Add Production</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

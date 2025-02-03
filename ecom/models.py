@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
-
+from django.utils.timezone import now
 
 # Create your models here.
 class Customer(models.Model):
@@ -28,13 +28,14 @@ class Product(models.Model):
     name = models.CharField(max_length=40)
     product_image = models.ImageField(upload_to="product_image/", null=True, blank=True)
     price = models.PositiveIntegerField()
-    description = models.CharField(max_length=100)  # Allow longer descriptions
+    description = models.CharField(max_length=100)  # Description field
     quantity = models.FloatField(default=0.0)  # For stock levels
     unit = models.CharField(max_length=20, default="kg")  # E.g., 'kg', 'liters'
     expiry_date = models.DateField(null=True, blank=True)  # Expiry tracking
+    date_added = models.DateField(default=now)  # Add this field
 
     def __str__(self):
-        return f"{self.name} ({self.quantity} {self.unit} )"
+        return f"{self.name} ({self.quantity} {self.unit})"
 
 
 class Orders(models.Model):
@@ -59,3 +60,12 @@ class Cart(models.Model):
 
     class Meta:
         unique_together = ('customer', 'product')
+
+
+class ProductProduction(models.Model):
+    product = models.ForeignKey("Product", on_delete=models.CASCADE)  # Reference to the product
+    quantity_produced = models.FloatField()  # Quantity of product produced
+    production_date = models.DateField(default=now)  # Date of production
+
+    def __str__(self):
+        return f"{self.quantity_produced} {self.product.unit} of {self.product.name} produced on {self.production_date}"

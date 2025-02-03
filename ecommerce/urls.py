@@ -18,6 +18,8 @@ urlpatterns = [
         LoginView.as_view(template_name="ecom/adminlogin.html"),
         name="adminlogin",
     ),
+    path("product-production-list", views.product_production_list_view, name="product-production-list"),
+    path("add-product-production", views.add_product_production_view, name="add-product-production"),
     path("admin-dashboard", views.admin_dashboard_view, name="admin-dashboard"),
     path("view-customer", views.view_customer_view, name="view-customer"),
     

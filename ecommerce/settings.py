@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "ecom",
     "widget_tweaks",
+    "templatetags",
 ]
 
 MIDDLEWARE = [
@@ -84,7 +85,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "dairysystem",
+        "NAME": "dairyecommerce",
         "USER": "postgres",
         "PASSWORD": "postgres",
         "HOST": "localhost",  # or your PostgreSQL server host

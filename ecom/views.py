@@ -10,7 +10,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.contrib.auth import logout
-from .models import Cart, Product, Customer
+from .models import Cart, Product, Customer,ProductProduction
 
 
 def increase_quantity(request, product_id):
@@ -26,6 +26,7 @@ def decrease_quantity(request, product_id):
         product.quantity -= 1
         product.save()
     return redirect("cart")
+
 
 
 def home_view(request):
@@ -115,6 +116,7 @@ from datetime import date, timedelta
 from django.shortcuts import render
 
 
+
 def admin_dashboard_view(request):
     # Counts for dashboard cards
     orders = Orders.objects.all()
@@ -176,6 +178,57 @@ def admin_dashboard_view(request):
     }
 
     return render(request, "ecom/admin_dashboard.html", context)
+
+
+
+def add_product_production_view(request):
+    # Get the list of products
+    products = Product.objects.all()
+
+    if request.method == 'POST':
+        # Handle form submission
+        product_id = request.POST.get('product')
+        quantity_produced = request.POST.get('quantity_produced')
+        production_date = request.POST.get('production_date')
+        
+        # Get the selected product by id
+        selected_product = Product.objects.get(id=product_id)
+        
+        # Create a new ProductProduction instance
+        new_production = ProductProduction(
+            product=selected_product,
+            quantity_produced=quantity_produced,
+            production_date=production_date
+        )
+        
+        # Save the new production record
+        new_production.save()
+        
+        # After saving, redirect to the product production list page
+        return redirect('product-production-list')  # This uses the URL name defined in urls.py
+
+    # Render the form if it's a GET request
+    context = {'products': products}
+    return render(request, 'ecom/add_product_production.html', context)
+
+
+
+def product_production_list_view(request):
+    # Get all product production records
+    product_productions = ProductProduction.objects.all()
+
+    # Calculate total quantity produced for each product
+    product_totals = {}
+    for production in product_productions:
+        if production.product not in product_totals:
+            product_totals[production.product] = 0
+        product_totals[production.product] += production.quantity_produced
+
+    # Pass product_totals to the template
+    return render(request, "ecom/product_production_list.html", {
+        'product_productions': product_productions,
+        'product_totals': product_totals,
+    })
 
 
 # admin view customer table
