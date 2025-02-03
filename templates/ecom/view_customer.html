@@ -2,76 +2,78 @@
 {% load static %}
 {% block content %}
 
-<div class="container-fluid px-4">
-  <div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-white py-3">
-      <div class="row align-items-center">
-        <div class="col-md-4">
-          <h5 class="mb-0 text-primary">
-            <i class="fas fa-users me-2"></i>Customer Management
-          </h5>
-        </div>
-        <div class="col-md-8">
-          <div class="d-flex gap-2 justify-content-md-end">
-            <div class="input-group input-group-sm" style="max-width: 300px;">
-              <span class="input-group-text bg-light border-end-0">
-                <i class="fas fa-search text-muted"></i>
-              </span>
-              <input type="text" class="form-control border-start-0" id="customerSearch" placeholder="Search customers...">
-            </div>
+<div class="container-fluid px-4 py-5">
+  <div class="row g-3 mb-4 align-items-center justify-content-between">
+    <div class="col-auto">
+      <h1 class="app-page-title mb-0">Customer Management</h1>
+    </div>
+    <div class="col-auto">
+      <div class="page-utilities">
+        <div class="row g-2 justify-content-start justify-content-md-end align-items-center">
+          <div class="col-auto">
+            <form class="table-search-form row gx-1 align-items-center">
+              <div class="col-auto">
+                <input type="text" id="customerSearch" name="searchcustomers" class="form-control search-customers" placeholder="Search customers">
+              </div>
+            </form>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="card-body p-0">
+  <div class="card app-card shadow-sm mb-4">
+    <div class="card-body p-4">
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" id="customersTable">
-          <thead class="bg-light">
+        <table class="table app-table-hover mb-0 text-left" id="customersTable">
+          <thead>
             <tr>
-              <th class="px-3 py-2">SN.</th>
-              <th class="px-3 py-2">Customer</th>
-              <th class="py-2">Contact</th>
-              <th class="py-2">Address</th>
-              <th class="py-2">Status</th>
+              <th class="cell">SN</th>
+              <th class="cell">Customer</th>
+              <th class="cell">ID</th>
+              <th class="cell">Contact</th>
+              <th class="cell">Address</th>
+              <th class="cell">Status</th>
             </tr>
           </thead>
           <tbody>
             {% for c in customers %}
             <tr>
-              <td class="px-3">{{ forloop.counter }}</td>
-              <td class="px-3">
+              <td class="cell">{{ forloop.counter }}</td> <!-- Serial Number -->
+              <td class="cell">
                 <div class="d-flex align-items-center">
-                  <div class="me-3">
+                  <div class="app-icon-holder me-2">
                     <img src="{{ c.profile_pic.url }}" 
-                    class="rounded-circle border" 
-                    alt="{{ c.get_name }}" 
-                    width="35" 
-                    height="35"
-                    style="object-fit: cover;" />
+                         class="rounded-circle" 
+                         alt="{{ c.get_name }}" 
+                         width="40" 
+                         height="40"
+                         style="object-fit: cover;" />
                   </div>
-                  <div>
-                    <h6 class="mb-0">{{ c.get_name }}</h6>
-                    <small class="text-muted">ID: {{ c.id }}</small>
-                  </div>
+                  <div>{{ c.get_name }}</div>
                 </div>
               </td>
-              <td>
+              <td class="cell">{{ c.id }}</td>
+              <td class="cell">
                 <div class="d-flex align-items-center">
                   <i class="fas fa-phone-alt text-muted me-2"></i>
                   {{ c.mobile }}
                 </div>
               </td>
-              <td>
+              <td class="cell">
                 <div class="d-flex align-items-center">
                   <i class="fas fa-map-marker-alt text-muted me-2"></i>
-                  <span class="text-truncate" style="max-width: 150px;" title="{{ c.address }}">
+                  <span class="text-truncate" title="{{ c.address }}">
                     {{ c.address }}
                   </span>
                 </div>
               </td>
-              <td>
-                <span class="badge bg-success">Active</span>
+              <td class="cell">
+                {% if c.is_active %}
+                  <span class="badge bg-success" style="font-size: 14px;">Active</span>
+                {% else %}
+                  <span class="badge bg-danger text-white" style="font-size: 14px;">Inactive</span>
+                {% endif %}
               </td>
             </tr>
             {% endfor %}
@@ -83,58 +85,98 @@
 </div>
 
 <style>
-.card {
-  border-radius: 0.75rem;
+
+
+.app-page-title {
+  font-size: 30px;
+  font-weight: bold;
+  color: var(--text-color);
 }
 
-.card-header {
-  border-bottom: 1px solid rgba(0,0,0,.05);
+.app-card {
+  background: #fff;
+  border-radius: 0.25rem;
+}
+
+.app-card .card-body {
+  padding: 1.5rem;
+}
+
+.app-table-hover > tbody > tr:hover {
+  background-color:rgb(190, 221, 220); /* Light pastel green */
+}
+
+
+
+.app-icon-holder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  overflow: hidden;
 }
 
 .table > :not(caption) > * > * {
-  padding: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  background-color: var(--bs-table-bg);
+  border-bottom-width: 1px;
+  box-shadow: inset 0 0 0 9999px var(--bs-table-accent-bg);
 }
 
 .badge {
-  padding: 0.4em 0.6em;
   font-weight: 500;
+  font-size: 0.75rem;
+  padding: 0.25em 0.5em;
+}
+
+.search-customers {
+  min-width: 250px;
 }
 
 .text-truncate {
-  max-width: 150px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: inline-block;
 }
 
-.input-group-text {
-  background-color: transparent;
+@media (max-width: 767.98px) {
+  .search-customers {
+    width: 100%;
+    min-width: auto;
+  }
 }
-
-.table td {
-  vertical-align: middle;
-}
-
-.table-hover tbody tr:hover {
-  background-color: #f1f1f1;
-}
-
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Search functionality
-  document.getElementById('customerSearch').addEventListener('keyup', function() {
-    var input = this.value.toLowerCase();
-    var table = document.getElementById('customersTable');
-    var rows = table.getElementsByTagName('tr');
-
-    for (var i = 1; i < rows.length; i++) {
-      var text = rows[i].textContent.toLowerCase();
-      rows[i].style.display = text.indexOf(input) > -1 ? '' : 'none';
-    }
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality for customer name or phone number
+    document.getElementById('customerSearch').addEventListener('keyup', function() {
+      var input = this.value.toLowerCase();
+      var table = document.getElementById('customersTable');
+      var rows = table.getElementsByTagName('tr');
+  
+      for (var i = 1; i < rows.length; i++) {
+        var customerName = rows[i].querySelector('td:nth-child(2)').textContent.toLowerCase(); // Customer Name column (2nd column)
+        var phoneNumber = rows[i].querySelector('td:nth-child(4)').textContent.toLowerCase(); // Phone Number column (4th column)
+  
+        // Check if input matches either the customer name or phone number
+        if (customerName.indexOf(input) > -1 || phoneNumber.indexOf(input) > -1) {
+          rows[i].style.display = '';
+        } else {
+          rows[i].style.display = 'none';
+        }
+      }
+    });
   });
-});
-</script>
+  </script>
 
 {% endblock content %}
+

@@ -1,42 +1,46 @@
 {% extends 'ecom/customer_base.html' %}
 {% load static %}
 {% load widget_tweaks %}
-{% block content %}
 
-{% if product_in_cart %}
-<form method="post">
-  {% csrf_token %}
-  <div class="container mt-5">
-    <div class="card shadow-sm rounded">
-      <div class="card-header text-center bg-dark text-white fs-4">
-        Shipping Details
-      </div>
-      <div class="card-body">
-        <ul class="list-unstyled">
-          <li class="mb-3">
-            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-            {% render_field addressForm.Email class="form-control" placeholder="Email" %}
-          </li>
-          <li class="mb-3">
-            <label for="mobile" class="form-label">Mobile <span class="text-danger">*</span></label>
-            {% render_field addressForm.Mobile class="form-control" placeholder="Mobile" %}
-          </li>
-          <li class="mb-3">
-            <label for="address" class="form-label">Shipment Address <span class="text-danger">*</span></label>
-            {% render_field addressForm.Address id="field5" class="form-control" placeholder="Building Number, City, Pin" rows="3" %}
-          </li>
-          <li class="mb-3 text-center">
-            <button type="submit" class="btn btn-primary btn-lg">Proceed to Pay</button>
-          </li>
-        </ul>
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+          <h4 class="mb-0">Order Summary</h4>
+        </div>
+        <div class="card-body">
+          <!-- Show cart items summary -->
+          <div class="mb-4">
+            <h5>Cart Items ({{ product_count_in_cart }})</h5>
+            <hr>
+            <h5 class="text-end">Total: ₨.{{ total }}</h5>
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Email <span class="text-danger">*</span></label>
+              {% render_field addressForm.Email class="form-control" placeholder="Email" value=customer.user.email %}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Mobile <span class="text-danger">*</span></label>
+              {% render_field addressForm.Mobile class="form-control" placeholder="Mobile" value=customer.mobile %}
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Delivery Address <span class="text-danger">*</span></label>
+              {% render_field addressForm.Address class="form-control" placeholder="Building Number, Street, City" rows="3" value=customer.address %}
+            </div>
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-credit-card me-2"></i>Proceed to Payment
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</form>
-{% else %}
-<div class="container mt-5">
-  <h1 class="text-center text-danger">First, Add Product to Cart</h1>
 </div>
-{% endif %}
-
-{% endblock content %}
+{% endblock %}

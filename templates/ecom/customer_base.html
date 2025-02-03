@@ -35,6 +35,18 @@
                 position: static;
                 transform: none;
             }
+
+            .navbar-nav .input-group .form-control {
+                border-right: none;
+            }
+            .navbar-nav .input-group .btn {
+                border-left: none;
+            }
+            .navbar-nav .input-group .form-control:focus {
+                box-shadow: none;
+                border-color: #ced4da;
+            }
+         
         }
     </style>
 </head>
@@ -51,11 +63,15 @@
                     <li class="nav-item"><a class="nav-link" href="/my-order"><i class="fas fa-truck me-1"></i>Track Orders</a></li>
                     <li class="nav-item"><a class="nav-link" href="/my-profile"><i class="fas fa-user me-1"></i>Profile</a></li>
                 </ul>
-                <ul class="navbar-nav navbar-center">
-                    <li class="nav-item">
-                        <form action="/search" method="get" class="d-flex">
-                            <input type="search" class="form-control me-2" placeholder="Search products" name="query" id="query">
-                            <button class="btn btn-outline-light" type="submit"><i class="fas fa-search"></i></button>
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item flex-grow-1" style="min-width: 250px;">
+                        <form class="d-flex" role="search">
+                            <div class="input-group">
+                                <input type="search" class="form-control" placeholder="Search products" aria-label="Search" id="productSearch" onkeyup="filterProducts()">
+                                <button class="btn btn-outline-light" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
                         </form>
                     </li>
                 </ul>
@@ -83,7 +99,21 @@
     </main>
 
     {% include 'ecom/footer.html' %}
-
+    <script>
+        function filterProducts() {
+          let searchQuery = document.getElementById("productSearch").value.toLowerCase();
+          let products = document.querySelectorAll(".product-item");
+      
+          products.forEach(product => {
+            let productName = product.getAttribute("data-name");
+            if (productName.includes(searchQuery)) {
+              product.style.display = "block";
+            } else {
+              product.style.display = "none";
+            }
+          });
+        }
+      </script>
     <!-- Bootstrap 5.3 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

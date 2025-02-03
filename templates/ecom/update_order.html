@@ -1,22 +1,24 @@
 {% extends 'ecom/admin_base.html' %}
 {% load widget_tweaks %}
-{% block content %}
 
-<div class="container mt-5">
+{% block content %}
+<div class="container-fluid py-5" style="background-color: #f8f9fa;">
   <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header text-center bg-gradient text-white">
-          <h4>Update Status Of Order</h4>
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white py-3">
+          <h4 class="card-title mb-0 text-center">Update Order Status</h4>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
           <form method="post">
             {% csrf_token %}
-            <div class="form-group">
-              <label for="status">Select Status:</label>
-              {% render_field orderForm.status class="form-control" placeholder="Select Status" %}
+            <div class="mb-4">
+              <label for="id_status" class="form-label">Select Status</label>
+              {% render_field orderForm.status class="form-select" placeholder="Select Status" %}
             </div>
-            <button type="submit" class="btn btn-success btn-block">Update Order Status</button>
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-dark btn-lg">Update</button>
+            </div>
           </form>
         </div>
       </div>
@@ -24,4 +26,22 @@
   </div>
 </div>
 
+<style>
+  .card {
+    border-radius: 1rem;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .card-header {
+    border-top-left-radius: 1rem !important;
+    border-top-right-radius: 1rem !important;
+  }
+  .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+ 
+ 
+</style>
 {% endblock content %}
+

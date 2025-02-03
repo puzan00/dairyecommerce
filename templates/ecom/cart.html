@@ -8,7 +8,7 @@
       My Cart
     </div>
 
-    {% if products %}
+    {% if cart_items %}
       <div class="table-responsive">
         <table class="table table-bordered align-middle">
           <thead class="table-light">
@@ -17,22 +17,20 @@
               <th scope="col">Name</th>
               <th scope="col">Image</th>
               <th scope="col">Price</th>
-              <th scope="col">Quantity</th>
               <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
-            {% for p in products %}
+            {% for item in cart_items %}
               <tr>
                 <td>{{ forloop.counter }}</td>
-                <td class="fw-semibold">{{ p.name }}</td>
+                <td class="fw-semibold">{{ item.product.name }}</td>
                 <td>
-                  <img src="{{ p.product_image.url }}" alt="{{ p.name }}" class="img-fluid rounded-3" style="max-width: 60px; max-height: 60px; object-fit: cover;">
+                  <img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded-3" style="max-width: 60px; max-height: 60px; object-fit: cover;">
                 </td>
-                <td>Rs. {{ p.price }}</td>
-                <td>{{ p.quantity }} {{ p.unit }}</td>
+                <td>Rs. {{ item.product.price }}</td>
                 <td>
-                  <a class="btn btn-danger btn-sm" href="{% url 'remove-from-cart' p.id %}" role="button">
+                  <a class="btn btn-danger btn-sm" href="{% url 'remove-from-cart' item.id %}" role="button">
                     <i class="bi bi-trash"></i> Remove
                   </a>
                 </td>
@@ -41,7 +39,7 @@
           </tbody>
           <tfoot>
             <tr class="fw-semibold bg-light">
-              <td colspan="4" class="text-end">Total</td>
+              <td colspan="3" class="text-end">Total</td>
               <td colspan="2">Rs. {{ total }}</td>
             </tr>
           </tfoot>

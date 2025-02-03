@@ -39,24 +39,24 @@
   <h3 class="text-center text-dark mt-5 mb-4">In Stock Products</h3>
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for p in in_stock_products %}
-    <div class="col">
-      <div class="card h-100 shadow-sm">
-        <div class="product-image-container">
-          {% if p.product_image %}
-            <img src="{{ p.product_image.url }}" class="card-img-top" alt="{{ p.name }}">
-          {% endif %}
-        </div>
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">{{ p.name }}</h5>
-          <p class="card-text flex-grow-1">{{ p.description|truncatechars:100 }}</p>
-          <h6 class="text-primary mb-3">₨.{{ p.price }}</h6>
-          <a href="{% url 'add-to-cart' p.id %}" class="btn btn-success">
-            <i class="fas fa-cart-plus me-2"></i>Add To Cart
-          </a>
-        </div>
-      </div>
+<div class="col product-item" data-name="{{ p.name|lower }}">
+  <div class="card h-100 shadow-sm">
+    <div class="product-image-container">
+      {% if p.product_image %}
+        <img src="{{ p.product_image.url }}" class="card-img-top" alt="{{ p.name }}">
+      {% endif %}
     </div>
-    {% endfor %}
+    <div class="card-body d-flex flex-column">
+      <h5 class="card-title">{{ p.name }}</h5>
+      <p class="card-text flex-grow-1">{{ p.description|truncatechars:100 }}</p>
+      <h6 class="text-primary mb-3">₨.{{ p.price }}</h6>
+      <a href="{% url 'add-to-cart' p.id %}" class="btn btn-success">
+        <i class="fas fa-cart-plus me-2"></i>Add To Cart
+      </a>
+    </div>
+  </div>
+</div>
+{% endfor %}
   </div>
   {% endif %}
 

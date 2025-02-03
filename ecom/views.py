@@ -10,6 +10,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.contrib.auth import logout
+from .models import Cart, Product, Customer
 
 
 def increase_quantity(request, product_id):
@@ -185,36 +186,36 @@ def view_customer_view(request):
 
 
 # admin delete customer
-@login_required(login_url="adminlogin")
-def delete_customer_view(request, pk):
-    customer = models.Customer.objects.get(id=pk)
-    user = models.User.objects.get(id=customer.user_id)
-    user.delete()
-    customer.delete()
-    return redirect("view-customer")
+# @login_required(login_url="adminlogin")
+# def delete_customer_view(request, pk):
+#     customer = models.Customer.objects.get(id=pk)
+#     user = models.User.objects.get(id=customer.user_id)
+#     user.delete()
+#     customer.delete()
+#     return redirect("view-customer")
 
 
-@login_required(login_url="adminlogin")
-def update_customer_view(request, pk):
-    customer = models.Customer.objects.get(id=pk)
-    user = models.User.objects.get(id=customer.user_id)
-    userForm = forms.CustomerUserForm(instance=user)
-    customerForm = forms.CustomerForm(request.FILES, instance=customer)
-    mydict = {"userForm": userForm, "customerForm": customerForm}
+# @login_required(login_url="adminlogin")
+# def update_customer_view(request, pk):
+#     customer = models.Customer.objects.get(id=pk)
+#     user = models.User.objects.get(id=customer.user_id)
+#     userForm = forms.CustomerUserForm(instance=user)
+#     customerForm = forms.CustomerForm(request.FILES, instance=customer)
+#     mydict = {"userForm": userForm, "customerForm": customerForm}
     
-    if request.method == "POST":
-        userForm = forms.CustomerUserForm(request.POST, instance=user)
-        customerForm = forms.CustomerForm(request.POST, instance=customer)
+#     if request.method == "POST":
+#         userForm = forms.CustomerUserForm(request.POST, instance=user)
+#         customerForm = forms.CustomerForm(request.POST, instance=customer)
         
-        if userForm.is_valid() and customerForm.is_valid():
-            user = userForm.save(commit=False)  # Don't save user yet
-            if userForm.cleaned_data.get('password'):
-                user.set_password(userForm.cleaned_data['password'])  # Set new password only if provided
-            user.save()  # Save the user object
-            customerForm.save()  # Save the customer form
-            return redirect("view-customer")
+#         if userForm.is_valid() and customerForm.is_valid():
+#             user = userForm.save(commit=False)  # Don't save user yet
+#             if userForm.cleaned_data.get('password'):
+#                 user.set_password(userForm.cleaned_data['password'])  # Set new password only if provided
+#             user.save()  # Save the user object
+#             customerForm.save()  # Save the customer form
+#             return redirect("view-customer")
     
-    return render(request, "ecom/admin_update_customer.html", context=mydict)
+#     return render(request, "ecom/admin_update_customer.html", context=mydict)
 
 # admin view the product
 @login_required(login_url="adminlogin")
@@ -316,151 +317,71 @@ def update_order_view(request, pk):
 
 # ---------------------------------------------------------------------------------
 # ------------------------ PUBLIC CUSTOMER RELATED VIEWS START ---------------------
-# ---------------------------------------------------------------------------------
-def search_view(request):
-    # whatever user write in search box we get in query
-    query = request.GET["query"]
-    products = models.Product.objects.all().filter(name__icontains=query)
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        counter = product_ids.split("|")
-        product_count_in_cart = len(set(counter))
-    else:
-        product_count_in_cart = 0
+# ---------------------------------------------------------------------------------from django.shortcuts import redirect, get_object_or_404, render
 
-    # word variable will be shown in html when user click on search button
-    word = "Searched Result :"
 
-    if request.user.is_authenticated:
-        return render(
-            request,
-            "ecom/customer_home.html",
-            {
-                "products": products,
-                "word": word,
-                "product_count_in_cart": product_count_in_cart,
-            },
-        )
-    return render(
-        request,
-        "ecom/index.html",
-        {
-            "products": products,
-            "word": word,
-            "product_count_in_cart": product_count_in_cart,
-        },
+# Add product to cart
+def add_to_cart(request, product_id):
+    if not request.user.is_authenticated:
+        return redirect("customerlogin")  # Redirect to login page if not authenticated
+
+    # Get the product the customer is adding to the cart
+    product = get_object_or_404(Product, id=product_id)
+
+    # Get the current customer (the logged-in user)
+    customer = get_object_or_404(Customer, user=request.user)
+
+    # Check if the product is already in the cart for the customer
+    cart_item, created = Cart.objects.get_or_create(
+        customer=customer, product=product
     )
 
 
-# any one can add product to cart, no need of signin
+    # Redirect to the cart view after adding the product
+    return redirect("cart")
+# View the cart
+# In views.py
 
-def add_to_cart_view(request, pk):
-    """
-    Adds a product to the cart. If the user is not authenticated, they are redirected to the login page.
-    Ensures no duplicate product IDs are stored in cookies.
-    """
-
-    # Check if user is authenticated, otherwise redirect to login page
-    if not request.user.is_authenticated:
-        return redirect("customerlogin")
-
-    # Retrieve existing product IDs from cookies
-    product_ids = request.COOKIES.get("product_ids", "")
-    product_id_list = product_ids.split("|") if product_ids else []
-
-    # Avoid adding duplicates
-    if str(pk) not in product_id_list:
-        product_id_list.append(str(pk))
-
-    # Prepare response with redirection to customer home
-    response = redirect("customer-home")
-
-    # Update cookies with new cart data
-    response.set_cookie("product_ids", "|".join(product_id_list))
-
-    return response
-# for checkout of cart
-from django.shortcuts import redirect
 
 def cart_view(request):
-    # Check if the user is authenticated, if not redirect to login page
     if not request.user.is_authenticated:
-        return redirect("customerlogin")  # Redirect to the login page
+        return redirect("customerlogin")  # Redirect to login page if not authenticated
 
-    # for cart counter
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        counter = product_ids.split("|")
-        product_count_in_cart = len(set(counter))
-    else:
-        product_count_in_cart = 0
+    # Get the current customer (the logged-in user)
+    customer = get_object_or_404(Customer, user=request.user)
 
-    # fetching product details from db whose id is present in cookie
-    products = None
-    total = 0
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        if product_ids != "":
-            product_id_in_cart = product_ids.split("|")
-            products = models.Product.objects.all().filter(id__in=product_id_in_cart)
+    # Get all cart items for the customer
+    cart_items = Cart.objects.filter(customer=customer)
 
-            # for total price shown in cart
-            for p in products:
-                total = total + p.price
+    # Calculate the total amount (no quantity adjustments, just sum the price of each product)
+    total = sum(item.product.price for item in cart_items)
 
-    return render(
-        request,
-        "ecom/cart.html",
-        {
-            "products": products,
-            "total": total,
-            "product_count_in_cart": product_count_in_cart,
-        },
-    )
+    # Get the count of items in the cart
+    product_count_in_cart = cart_items.count()
 
+    # Render the cart page with the context
+    return render(request, "ecom/cart.html", {
+        "cart_items": cart_items,
+        "total": total,
+        "product_count_in_cart": product_count_in_cart,
+    })
 
 def remove_from_cart_view(request, pk):
-    # for counter in cart
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        counter = product_ids.split("|")
-        product_count_in_cart = len(set(counter))
-    else:
-        product_count_in_cart = 0
+    if not request.user.is_authenticated:
+        return redirect("customerlogin")  # Redirect to login page if not authenticated
 
-    # removing product id from cookie
-    total = 0
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        product_id_in_cart = product_ids.split("|")
-        product_id_in_cart = list(set(product_id_in_cart))
-        product_id_in_cart.remove(str(pk))
-        products = models.Product.objects.all().filter(id__in=product_id_in_cart)
-        # for total price shown in cart after removing product
-        for p in products:
-            total = total + p.price
+    # Get the cart item to be removed
+    cart_item = get_object_or_404(Cart, id=pk)  # Use 'pk' here, not 'cart_item_id'
 
-        #  for update coookie value after removing product id in cart
-        value = ""
-        for i in range(len(product_id_in_cart)):
-            if i == 0:
-                value = value + product_id_in_cart[0]
-            else:
-                value = value + "|" + product_id_in_cart[i]
-        response = render(
-            request,
-            "ecom/cart.html",
-            {
-                "products": products,
-                "total": total,
-                "product_count_in_cart": product_count_in_cart,
-            },
-        )
-        if value == "":
-            response.delete_cookie("product_ids")
-        response.set_cookie("product_ids", value)
-        return response
+    # Ensure that the cart item belongs to the logged-in user
+    if cart_item.customer.user != request.user:
+        return redirect("cart")  # Prevent unauthorized removal
 
+    # Delete the cart item
+    cart_item.delete()
+
+    # Redirect to the cart view after removal
+    return redirect("cart")
 
 
 
@@ -472,20 +393,13 @@ def remove_from_cart_view(request, pk):
 @user_passes_test(is_customer)
 def customer_home_view(request):
     products = models.Product.objects.all()
-    out_of_stock_products = []
-    in_stock_products = []
-
-    for product in products:
-        if models.Orders.objects.filter(product=product).exists():
-            out_of_stock_products.append(product)
-        else:
-            in_stock_products.append(product)
-
-    product_count_in_cart = 0
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        product_count_in_cart = len(set(product_ids.split("|")))
-
+    # Modify the stock check logic to use the quantity field
+    out_of_stock_products = products.filter(quantity=0)
+    in_stock_products = products.exclude(quantity=0)
+    
+    # Get cart count directly from the database
+    product_count_in_cart = models.Cart.objects.filter(customer__user=request.user).count()
+    
     return render(
         request,
         "ecom/customer_home.html",
@@ -497,126 +411,104 @@ def customer_home_view(request):
     )
 
 # shipment address before placing order
+
+
 @login_required(login_url="customerlogin")
 def customer_address_view(request):
-    # this is for checking whether product is present in cart or not
-    # if there is no product in cart we will not show address form
-    product_in_cart = False
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        if product_ids != "":
-            product_in_cart = True
-    # for counter in cart
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        counter = product_ids.split("|")
-        product_count_in_cart = len(set(counter))
-    else:
-        product_count_in_cart = 0
-
-    addressForm = forms.AddressForm()
+    customer = get_object_or_404(models.Customer, user=request.user)
+    cart_items = models.Cart.objects.filter(customer=customer)
+    
+    if not cart_items.exists():
+        return redirect("cart")
+    
+    # Calculate total here to pass to both POST and GET renders
+    total = sum(item.product.price for item in cart_items)
+    
     if request.method == "POST":
-        addressForm = forms.AddressForm(request.POST)
-        if addressForm.is_valid():
-            # here we are taking address, email, mobile at time of order placement
-            # we are not taking it from customer account table because
-            # these thing can be changes
-            email = addressForm.cleaned_data["Email"]
-            mobile = addressForm.cleaned_data["Mobile"]
-            address = addressForm.cleaned_data["Address"]
-            # for showing total price on payment page.....accessing id from cookies then fetching  price of product from db
-            total = 0
-            if "product_ids" in request.COOKIES:
-                product_ids = request.COOKIES["product_ids"]
-                if product_ids != "":
-                    product_id_in_cart = product_ids.split("|")
-                    products = models.Product.objects.all().filter(
-                        id__in=product_id_in_cart
-                    )
-                    for p in products:
-                        total = total + p.price
-
-            response = render(request, "ecom/payment.html", {"total": total})
-            response.set_cookie("email", email)
-            response.set_cookie("mobile", mobile)
-            response.set_cookie("address", address)
-            return response
+        address_form = forms.AddressForm(request.POST)
+        if address_form.is_valid():
+            # Store address details in session instead of cookies
+            request.session['order_details'] = {
+                'email': address_form.cleaned_data["Email"],
+                'mobile': address_form.cleaned_data["Mobile"],
+                'address': address_form.cleaned_data["Address"],
+            }
+            return render(request, "ecom/payment.html", {"total": total})
+    else:
+        # Pre-fill form with existing customer data
+        address_form = forms.AddressForm(initial={
+            'Email': customer.user.email,
+            'Mobile': customer.mobile,
+            'Address': customer.address,
+        })
+    
     return render(
         request,
         "ecom/customer_address.html",
         {
-            "addressForm": addressForm,
-            "product_in_cart": product_in_cart,
-            "product_count_in_cart": product_count_in_cart,
+            "addressForm": address_form,
+            "product_count_in_cart": cart_items.count(),
+            "total": total,
         },
     )
 
 
 # here we are just directing to this view...actually we have to check whther payment is successful or not
 # then only this view should be accessed
+
+
+
+from django.db import transaction  # Add this import
+
 @login_required(login_url="customerlogin")
 def payment_success_view(request):
-    # Here we will place order | after successful payment
-    # we will fetch customer  mobile, address, Email
-    # we will fetch product id from cookies then respective details from db
-    # then we will create order objects and store in db
-    # after that we will delete cookies because after order placed...cart should be empty
-    customer = models.Customer.objects.get(user_id=request.user.id)
-    products = None
-    email = None
-    mobile = None
-    address = None
-    if "product_ids" in request.COOKIES:
-        product_ids = request.COOKIES["product_ids"]
-        if product_ids != "":
-            product_id_in_cart = product_ids.split("|")
-            products = models.Product.objects.all().filter(id__in=product_id_in_cart)
-            # Here we get products list that will be ordered by one customer at a time
+    customer = get_object_or_404(models.Customer, user=request.user)
+    cart_items = models.Cart.objects.filter(customer=customer)
 
-    # these things can be change so accessing at the time of order...
-    if "email" in request.COOKIES:
-        email = request.COOKIES["email"]
-    if "mobile" in request.COOKIES:
-        mobile = request.COOKIES["mobile"]
-    if "address" in request.COOKIES:
-        address = request.COOKIES["address"]
+    order_details = request.session.get('order_details', {})
 
-    # here we are placing number of orders as much there is a products
-    # suppose if we have 5 items in cart and we place order....so 5 rows will be created in orders table
-    # there will be lot of redundant data in orders table...but its become more complicated if we normalize it
-    for product in products:
-        models.Orders.objects.get_or_create(
-            customer=customer,
-            product=product,
-            status="Pending",
-            email=email, 
-            mobile=mobile,
-            address=address,
-        )
+    with transaction.atomic():
+        orders = []
+        for cart_item in cart_items:
+            order_quantity = 1  # Assume 1 unit for now, adjust based on user input if needed
+            # Create a new order
+            order = models.Orders(
+                customer=customer,
+                product=cart_item.product,
+                status="Pending",
+                email=order_details.get('email', ''),
+                mobile=order_details.get('mobile', ''),
+                address=order_details.get('address', ''),
+                quantity=order_quantity  # Store quantity in the order
+            )
+            orders.append(order)
 
-    # after order placed cookies should be deleted
-    response = render(request, "ecom/payment_success.html")
-    response.delete_cookie("product_ids")
-    response.delete_cookie("email")
-    response.delete_cookie("mobile")
-    response.delete_cookie("address")
-    return response
+            # Decrease the product stock based on quantity
+            cart_item.product.quantity -= order_quantity
+            cart_item.product.save()
+
+        # Bulk create orders
+        models.Orders.objects.bulk_create(orders)
+
+        # Clear cart and session
+        cart_items.delete()
+        request.session.pop('order_details', None)
+
+    return render(request, "ecom/payment_success.html", {"orders": orders})
 
 
 @login_required(login_url="customerlogin")
 @user_passes_test(is_customer)
 def my_order_view(request):
-
     customer = models.Customer.objects.get(user_id=request.user.id)
-    orders = models.Orders.objects.all().filter(customer_id=customer)
-    ordered_products = []
-    for order in orders:
-        ordered_product = models.Product.objects.all().filter(id=order.product.id)
-        ordered_products.append(ordered_product)
-
+    orders = models.Orders.objects.filter(customer=customer).select_related('product')  # Optimized query
+    
     return render(
-        request, "ecom/my_order.html", {"data": zip(ordered_products, orders)}
+        request,
+        "ecom/my_order.html",
+        {"orders": orders}  # Pass the orders queryset directly to the template
     )
+
 
 
 
