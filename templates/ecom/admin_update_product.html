@@ -45,30 +45,20 @@
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="expiry_date" class="form-label">Expiry Date</label>
-                  {% render_field productForm.expiry_date class="form-control" type="date" id="expiry_date" %}
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
                   <label for="product_image" class="form-label">Product Image</label>
                   {% render_field productForm.product_image class="form-control" id="product_image" %}
                 </div>
               </div>
 
-              <!-- Image display block commented out -->
-                <!--
-              {% if productForm.instance.product_image %}
-              <div class="col-12">
-                <div class="card bg-light">
-                  <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">Current Product Image</h6>
-                    <img src="{{ productForm.instance.product_image.url }}" alt="Current Image" class="img-fluid rounded" style="max-height: 200px; width: auto;" />
-                  </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="expiry_date" class="form-label" required>Expiry Date</label>
+                  {% render_field productForm.expiry_date class="form-control" type="date" id="expiry_date" %}
                 </div>
               </div>
-              {% endif %}
-              -->
+              
+
+             
             </div>
             <div class="d-grid gap-2 mt-4">
               <button type="submit" class="btn btn-primary btn-md">Edit</button>

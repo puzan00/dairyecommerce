@@ -1,12 +1,20 @@
 {% extends 'ecom/admin_base.html' %}
 {% load static %}
 {% block content %}
+<style>
+
+.custom-spacing div {
+  margin-left: 10px; 
+}
+</style>
 
 <div class="container-fluid">
   <div class="row g-4 py-4">
     <!-- Dashboard Header -->
     <div class="col-12">
       <h2 class="fw-bold text-dark">Admin Dashboard</h2>
+      <hr style="border: 0; height: 3px; background-color: #4CAF50; margin-top: 20px; margin-bottom: 20px;">
+
     </div>
 
     <!-- Dashboard Cards -->
@@ -58,59 +66,67 @@
           </div>
 
           <!-- Sales Report Table -->
-          <div class="row mt-4">
-            <div class="col-12">
-              <div class="table-responsive">
-                <table class="table table-hover table-striped" id="salesTable">
-                  <thead class="table-light">
-                    <tr>
-                      <th>SN</th>
-                      <th>Customer</th>
-                      <th>Contact</th>
-                      <th>Product</th>
-                      <th>Order Date</th>
-                      <th>Price</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for order in recent_orders %}
-                    <tr>
-                      <td>{{ forloop.counter }}</td>
-                      <td>
-                        <div class="fw-bold">{{ order.customer.get_name }}</div>
-                        <div class="text-muted small">{{ order.address|truncatechars:20 }}</div>
-                      </td>
-                      <td>{{ order.customer.mobile }}</td>
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <img src="{{ order.product.product_image.url }}" class="rounded me-2" width="40" height="40" alt="Product">
-                          <div>{{ order.product.name }}</div>
-                        </div>
-                      </td>
-                      <td>{{ order.order_date|date:"M d, Y" }}</td>
-                      <td>₹{{ order.product.price|floatformat:2 }}</td>
-                      <td>
-                        {% if order.status == 'Pending' %}
-                        <span class="badge bg-warning text-dark">{{ order.status }}</span>
-                        {% elif order.status == 'Delivered' %}
-                        <span class="badge bg-success">{{ order.status }}</span>
-                        {% elif order.status == 'Out for Delivery' %}
-                        <span class="badge bg-info">{{ order.status }}</span>
-                        {% else %}
-                        <span class="badge bg-primary">{{ order.status }}</span>
-                        {% endif %}
-                      </td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+     
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;"> <!-- Scrollable Area -->
+      <table class="table table-hover table-striped" id="salesTable">
+        <thead class="table-light">
+          <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">Sales Report Table</h3>
           </div>
+          <tr>
+            <th>SN</th>
+            <th>Customer</th>
+            <th>Contact</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Order Date</th>
+            <th>Price</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+              <div class="fw-bold">{{ order.customer.get_name }}</div>
+              <div class="text-muted small">{{ order.address|truncatechars:20 }}</div>
+            </td>
+            <td>{{ order.customer.mobile }}</td>
+            <td>
+              <div class="d-flex align-items-center custom-spacing">
+                <img src="{{ order.product.product_image.url }}" class="rounded" width="40" height="40" alt="Product">
+                <div>{{ order.product.name }}</div>
+              </div>
+            </td>
+            
+            <td>{{ order.product.quantity }} {{ order.product.unit }}</td>
+            <td>{{ order.order_date|date:"M d, Y" }}</td>
+            <td>Rs. {{ order.product.price }}</td>
+            <td>
+              {% if order.status == 'Pending' %}
+              <span class="badge bg-warning text-dark">{{ order.status }}</span>
+              {% elif order.status == 'Delivered' %}
+              <span class="badge bg-success">{{ order.status }}</span>
+              {% elif order.status == 'Out for Delivery' %}
+              <span class="badge bg-info">{{ order.status }}</span>
+              {% else %}
+              <span class="badge bg-primary">{{ order.status }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
         </div>
       </div>
     </div>
+  </div>
+</div>
+</div>
+</div>
 
     <!-- Expiry Alerts Section -->
     <div class="col-12">
@@ -284,16 +300,16 @@ new Chart(salesAnalysisCtx, {
         'rgb(255, 205, 86)'
       ],
       borderWidth: 1,
-      barThickness: 60, // Reduced from 80
-      maxBarThickness: 70, // Reduced from 90
-      categoryPercentage: 0.8, // Controls spacing between bar groups
-      barPercentage: 0.9 // Controls width of bars within groups
+      barThickness: 60,
+      maxBarThickness: 70,
+      categoryPercentage: 0.8,
+      barPercentage: 0.9
     }]
   },
   options: {
     responsive: true,
     maintainAspectRatio: true,
-    aspectRatio: 2.5, // Increased from 2 to make it shorter
+    aspectRatio: 2.5,
     plugins: {
       title: {
         display: true,
@@ -301,7 +317,7 @@ new Chart(salesAnalysisCtx, {
         font: {
           size: 14
         },
-        padding: { bottom: 10 } // Reduced padding after title
+        padding: { bottom: 10 }
       },
       legend: {
         display: false
@@ -309,7 +325,15 @@ new Chart(salesAnalysisCtx, {
       tooltip: {
         callbacks: {
           label: function(context) {
-            return `Sales: Rs.${context.raw.toLocaleString()}`;
+            let label = `Sales: Rs.${context.raw.toLocaleString()}`;
+
+            if (context.dataIndex === 1) {
+              label += ` | Quantity: {{ highest_sales_quantity }} {{ highest_sales_unit }}`;
+            } else if (context.dataIndex === 2) {
+              label += ` | Quantity: {{ lowest_sales_quantity }} {{ lowest_sales_unit }}`;
+            }
+
+            return label;
           },
           title: function(context) {
             return context[0].label.replace('\n', ' - ');
@@ -326,7 +350,7 @@ new Chart(salesAnalysisCtx, {
           font: {
             size: 12
           },
-          padding: { top: 0, bottom: 0 } // Reduced padding for axis title
+          padding: { top: 0, bottom: 0 }
         },
         ticks: {
           font: {
@@ -335,7 +359,7 @@ new Chart(salesAnalysisCtx, {
           callback: function(value) {
             return 'Rs.' + value.toLocaleString();
           },
-          padding: 5 // Reduced padding for tick labels
+          padding: 5
         }
       },
       x: {
@@ -345,20 +369,21 @@ new Chart(salesAnalysisCtx, {
           },
           autoSkip: false,
           maxRotation: 0,
-          padding: 5 // Reduced padding between labels
+          padding: 5
         }
       }
     },
     layout: {
       padding: {
-        left: 5,  // Reduced from 10
-        right: 5, // Reduced from 10
-        top: 5,   // Reduced from 10
-        bottom: 15 // Reduced from 20
+        left: 5,
+        right: 5,
+        top: 5,
+        bottom: 15
       }
     }
   }
 });
+
   
 </script>
 {% endblock content %}

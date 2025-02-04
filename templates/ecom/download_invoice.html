@@ -122,14 +122,11 @@
           <table class="table table-bordered table-striped">
             <tr>
               <td class="title">
-                <h5>Ecommerce Site - Django</h5>
+                <h5>Dairy Product Sales Invoice</h5>
               </td>
 
               <td>
-
-
-                Order Date: {{orderDate}}<br>
-
+                Order Date: {{ orderDate }}<br>
               </td>
             </tr>
           </table>
@@ -141,65 +138,49 @@
           <table>
             <tr>
               <td>
-                Customer : <br>{{customerName}}<br><br>
-                Customer Email :<br> {{customerEmail}}
-
+                <strong>Customer:</strong><br>{{ customerName }}<br><br>
+                <strong>Customer Email:</strong><br>{{ customerEmail }}
               </td>
 
               <td>
-                Contact Number :<br>
-                {{customerMobile}}<br><br>
-                  Shipment Address :<br> {{shipmentAddress}}
-
+                <strong>Contact Number:</strong><br>{{ customerMobile }}<br><br>
+                <strong>Shipment Address:</strong><br>{{ shipmentAddress }}
               </td>
             </tr>
           </table>
         </td>
       </tr>
-
 
       <tr class="information">
         <td colspan="2">
           <table>
             <tr>
               <td>
-                Product Image :<br>
-                 <img src="{{ product_image.url }}" alt="Profile Pic" height="40px" width="40px" /><br><br>
-                Product Price : <br>
-                ${{productPrice}}
+                <strong>Product Price:</strong><br>Rs. {{ productPrice }}
               </td>
               <td>
-                Product: <br> {{productName}}<br><br>
-                Description: <br> {{productDescription}}
+                <strong>Product:</strong><br>{{ productName }}<br><br>
+                <strong>Product Description:</strong><br>{{ productDescription }}
               </td>
-
             </tr>
           </table>
         </td>
       </tr>
-
-
 
       <tr class="information">
         <td colspan="2">
           <table>
             <tr>
               <td>
-                Order Status :<br><br>
-                  {{orderStatus}}
+                <strong>Order Status:</strong><br><br>
+                {{ orderStatus }}
               </td>
             </tr>
           </table>
         </td>
       </tr>
-
-
-      
-
-
     </table>
   </div>
 </body>
-
 
 </html>

@@ -10,41 +10,98 @@
             <a href="{% url 'add-product-production' %}" class="btn btn-success">Add Product Production</a>
         </div>
         <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th scope="col">Product</th>
-                        <th scope="col">Quantity Produced</th>
-                        <th scope="col">Unit</th>
-                        <th scope="col">Production Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for production in product_productions %}
-                        <tr>
-                            <td>{{ production.product.name }}</td>
-                            <td>{{ production.quantity_produced }}</td>
-                            <td>{{ production.product.unit }}</td>
-                            <td>{{ production.production_date }}</td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center">No product production records available.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <!-- Search Form -->
+            <form class="mb-3" id="searchForm">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by product name or production date">
+            </form>
 
-            <!-- Display total quantity produced for each product -->
-            <div class="mt-3">
-                <h5>Total Quantity</h5>
-                <ul>
-                    {% for product, total_quantity in product_totals.items %}
-                        <li>{{ product.name }}: {{ total_quantity }}</li>
-                    {% endfor %}
-                </ul>
+            <!-- Scrollable Table Section -->
+            <div style="max-height: 400px; overflow-y: auto; position: relative;">
+                <table class="table table-striped" id="productionTable">
+                    <thead style="position: sticky; top: 0; background-color: #f8f9fc; z-index: 1;">
+                        <tr>
+                            <th scope="col">SN.</th> <!-- Serial Number Column -->
+                            <th scope="col">Product</th>
+                            <th scope="col">Quantity Produced</th>
+                            <th scope="col">Production Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for production in product_productions %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td> <!-- Display serial number -->
+                                <td>{{ production.product.name }}</td>
+                                <td>{{ production.quantity_produced }}{{ production.product.unit }}</td>
+                                <td class="production-date" data-date="{{ production.production_date }}">
+                                    {{ production.production_date }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No product production records available.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+
+           <!-- Display total quantity produced per product and production date -->
+<div class="mt-3">
+    <h5>Total Quantity Produced Per Product</h5>
+    <ul>
+        {% for product, totals in product_totals.items %}
+            <h6>{{ product.name }} (Total: {{ totals.total_quantity }}{{ product.unit }})</h6>
+            <ul>
+                {% for date, total_quantity in totals.dates.items %}
+                    <li>{{ date|date:"F j, Y" }}: {{ total_quantity }}{{ product.unit }}</li>
+                {% endfor %}
+            </ul>
+        {% empty %}
+            <p>No product production totals available.</p>
+        {% endfor %}
+    </ul>
+</div>
+
         </div>
     </div>
 </div>
+
+<script>
+    // Function to filter table rows based on search input
+    document.getElementById("searchInput").addEventListener("input", function() {
+        var searchValue = this.value.toLowerCase();
+        var table = document.getElementById("productionTable");
+        var rows = table.getElementsByTagName("tr");
+
+        for (var i = 1; i < rows.length; i++) {
+            var row = rows[i];
+            var cells = row.getElementsByTagName("td");
+            var productName = cells[1].textContent.toLowerCase();
+            var productionDate = cells[3].textContent.toLowerCase();
+
+            // Check if any column contains the search value
+            if (productName.indexOf(searchValue) > -1 || productionDate.indexOf(searchValue) > -1) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
+    });
+
+    // Format all production dates after page load
+    window.onload = function() {
+        var dateCells = document.querySelectorAll('.production-date');
+        dateCells.forEach(function(cell) {
+            var originalDate = new Date(cell.getAttribute('data-date'));
+            var formattedDate = formatDate(originalDate);
+            cell.textContent = formattedDate; // Update the table with formatted date
+        });
+    };
+
+    // Function to format date into "Month Day, Year" format
+    function formatDate(date) {
+        var options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
+    }
+</script>
 {% endblock %}

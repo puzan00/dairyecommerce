@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.contrib.auth import logout
 from .models import Cart, Product, Customer,ProductProduction
+from django.db import transaction
 
 
 def increase_quantity(request, product_id):
@@ -121,18 +122,26 @@ from django.db.models import Sum, F
 from .models import Orders, Customer, Product, ProductProduction
 from django.db.models.functions import TruncWeek
 
+
+
+
 def admin_dashboard_view(request):
     # Counts for dashboard cards
-    orders = Orders.objects.all()
+    orders = Orders.objects.all().order_by('-order_date')
     ordered_products = []
     ordered_bys = []
+    product_quantities = []
+    product_units = []
+
     for order in orders:
         ordered_product = order.product
         ordered_by = order.customer
         ordered_products.append(ordered_product)
         ordered_bys.append(ordered_by)
+        product_quantities.append(order.quantity)  # Quantity from the order
+        product_units.append(ordered_product.unit)  # Unit from the product
 
-    data = zip(ordered_products, ordered_bys, orders)
+    data = zip(ordered_products, ordered_bys, orders, product_quantities, product_units)
 
     customer_count = Customer.objects.count()
     product_count = Product.objects.count()
@@ -160,7 +169,7 @@ def admin_dashboard_view(request):
 
     # Group production data by product and date
     production_data = defaultdict(lambda: defaultdict(float))
-    
+
     for production in product_productions:
         production_data[production.product.name][production.production_date] += production.quantity_produced
 
@@ -183,19 +192,23 @@ def admin_dashboard_view(request):
 
     # Highest Sales (highest sales in a single order)
     highest_sales_order = Orders.objects.annotate(
-        total_sales=Sum(F('product__price') * F('quantity'))
-    ).order_by('-total_sales').first()
+        order_sales=F('product__price') * F('quantity')
+    ).order_by('-order_sales').first()
 
-    highest_sales = highest_sales_order.total_sales if highest_sales_order else 0
+    highest_sales = highest_sales_order.order_sales if highest_sales_order else 0
     highest_sales_product = highest_sales_order.product.name if highest_sales_order else 'N/A'
+    highest_sales_quantity = highest_sales_order.product.quantity if highest_sales_order else 0
+    highest_sales_unit = highest_sales_order.product.unit if highest_sales_order else 'N/A'
 
     # Lowest Sales (lowest sales in a single order)
     lowest_sales_order = Orders.objects.annotate(
-        total_sales=Sum(F('product__price') * F('quantity'))
-    ).order_by('total_sales').first()
+        order_sales=F('product__price') * F('quantity')
+    ).order_by('order_sales').first()
 
-    lowest_sales = lowest_sales_order.total_sales if lowest_sales_order else 0
+    lowest_sales = lowest_sales_order.order_sales if lowest_sales_order else 0
     lowest_sales_product = lowest_sales_order.product.name if lowest_sales_order else 'N/A'
+    lowest_sales_quantity = lowest_sales_order.product.quantity if lowest_sales_order else 0
+    lowest_sales_unit = lowest_sales_order.product.unit if lowest_sales_order else 'N/A'
 
     # Total Orders (Count of all orders)
     total_orders = Orders.objects.count()
@@ -210,8 +223,12 @@ def admin_dashboard_view(request):
         "total_orders": total_orders,
         "highest_sales": highest_sales,
         "highest_sales_product": highest_sales_product,
+        "highest_sales_quantity": highest_sales_quantity,
+        "highest_sales_unit": highest_sales_unit,
         "lowest_sales": lowest_sales,
         "lowest_sales_product": lowest_sales_product,
+        "lowest_sales_quantity": lowest_sales_quantity,
+        "lowest_sales_unit": lowest_sales_unit,
         "recent_orders": recent_orders,
         "expired_products": expired_products,
         "expiry_7_days": expiry_7_days,
@@ -220,7 +237,6 @@ def admin_dashboard_view(request):
         "production_labels": production_labels,
         "production_quantities": production_quantities,
         "production_dates": production_dates,
-        
     }
 
     return render(request, "ecom/admin_dashboard.html", context)
@@ -257,23 +273,37 @@ def add_product_production_view(request):
     return render(request, 'ecom/add_product_production.html', context)
 
 
+from datetime import date
 
 def product_production_list_view(request):
     # Get all product production records
     product_productions = ProductProduction.objects.all()
 
-    # Calculate total quantity produced for each product
+    # Calculate total quantity produced for each product by date
     product_totals = {}
     for production in product_productions:
-        if production.product not in product_totals:
-            product_totals[production.product] = 0
-        product_totals[production.product] += production.quantity_produced
+        product = production.product
+        production_date = production.production_date  # Use the date as is
+        quantity_produced = production.quantity_produced
+
+        # Initialize the product entry in the product_totals if not already present
+        if product not in product_totals:
+            product_totals[product] = {'total_quantity': 0, 'dates': {}}
+        
+        # Add the quantity to the total for that product
+        product_totals[product]['total_quantity'] += quantity_produced
+
+        # Add the quantity for a specific date if needed
+        if production_date not in product_totals[product]['dates']:
+            product_totals[product]['dates'][production_date] = 0
+        product_totals[product]['dates'][production_date] += quantity_produced
 
     # Pass product_totals to the template
     return render(request, "ecom/product_production_list.html", {
         'product_productions': product_productions,
         'product_totals': product_totals,
     })
+
 
 
 # admin view customer table
@@ -375,7 +405,7 @@ def update_product_view(request, pk):
 
 @login_required(login_url="adminlogin")
 def admin_view_booking_view(request):
-    orders = models.Orders.objects.all()
+    orders = models.Orders.objects.all().order_by('-order_date')
     ordered_products = []
     ordered_bys = []
     for order in orders:
@@ -418,46 +448,56 @@ def update_order_view(request, pk):
 # ---------------------------------------------------------------------------------from django.shortcuts import redirect, get_object_or_404, render
 
 
-# Add product to cart
+
 def add_to_cart(request, product_id):
     if not request.user.is_authenticated:
-        return redirect("customerlogin")  # Redirect to login page if not authenticated
+        return redirect("customerlogin")
 
-    # Get the product the customer is adding to the cart
     product = get_object_or_404(Product, id=product_id)
-
-    # Get the current customer (the logged-in user)
     customer = get_object_or_404(Customer, user=request.user)
 
-    # Check if the product is already in the cart for the customer
-    cart_item, created = Cart.objects.get_or_create(
-        customer=customer, product=product
-    )
+    # Check if the product is already in the cart of any customer
+    existing_cart_item = Cart.objects.filter(product=product).first()
 
+    if existing_cart_item:
+        # If the product is already in another cart, it's out of stock for the current user
+        messages.error(request, f"{product.name} is already in another cart and is out of stock!")
+        return redirect("customer-home")
+    
+    # Add product to cart (1 quantity)
+    Cart.objects.create(customer=customer, product=product, quantity=1)
+    
+    # Now the product is effectively out of stock for others, no need to track its quantity in the model.
+    messages.success(request, f"{product.name} has been added to your cart.")
 
-    # Redirect to the cart view after adding the product
     return redirect("cart")
-# View the cart
+
+
 # In views.py
 
-
+# Updated cart view with stock validation
 def cart_view(request):
     if not request.user.is_authenticated:
-        return redirect("customerlogin")  # Redirect to login page if not authenticated
+        return redirect("customerlogin")
 
-    # Get the current customer (the logged-in user)
     customer = get_object_or_404(Customer, user=request.user)
+    cart_items = Cart.objects.filter(customer=customer).select_related('product')
+    
+    # Validate stock levels for each cart item
+    for item in cart_items:
+        if item.quantity > item.product.quantity:
+            item.quantity = item.product.quantity
+            item.save()
+            if item.product.quantity == 0:
+                item.delete()
+                messages.warning(request, f"{item.product.name} has been removed from cart (Out of Stock)")
+            else:
+                messages.warning(request, f"Quantity adjusted for {item.product.name} due to stock availability")
 
-    # Get all cart items for the customer
-    cart_items = Cart.objects.filter(customer=customer)
-
-    # Calculate the total amount (no quantity adjustments, just sum the price of each product)
-    total = sum(item.product.price for item in cart_items)
-
-    # Get the count of items in the cart
+    # Recalculate total after any adjustments
+    total = sum(item.product.price * item.quantity for item in cart_items)
     product_count_in_cart = cart_items.count()
 
-    # Render the cart page with the context
     return render(request, "ecom/cart.html", {
         "cart_items": cart_items,
         "total": total,
@@ -490,14 +530,15 @@ def remove_from_cart_view(request, pk):
 @login_required(login_url="customerlogin")
 @user_passes_test(is_customer)
 def customer_home_view(request):
-    products = models.Product.objects.all()
-    # Modify the stock check logic to use the quantity field
-    out_of_stock_products = products.filter(quantity=0)
-    in_stock_products = products.exclude(quantity=0)
-    
-    # Get cart count directly from the database
-    product_count_in_cart = models.Cart.objects.filter(customer__user=request.user).count()
-    
+    # Get all products
+    products = Product.objects.all()
+
+    # Check if the product is already in any cart (if a product is added to cart, it's out of stock)
+    out_of_stock_products = products.filter(cart__isnull=False).distinct()
+    in_stock_products = products.exclude(id__in=out_of_stock_products)
+
+    product_count_in_cart = Cart.objects.filter(customer__user=request.user).count()
+
     return render(
         request,
         "ecom/customer_home.html",
@@ -505,7 +546,7 @@ def customer_home_view(request):
             "in_stock_products": in_stock_products,
             "out_of_stock_products": out_of_stock_products,
             "product_count_in_cart": product_count_in_cart,
-        },
+        }
     )
 
 # shipment address before placing order
@@ -555,22 +596,27 @@ def customer_address_view(request):
 # then only this view should be accessed
 
 
-
-from django.db import transaction  # Add this import
+# Updated payment success view with better stock management
 @login_required(login_url="customerlogin")
 def payment_success_view(request):
     customer = get_object_or_404(models.Customer, user=request.user)
-    cart_items = models.Cart.objects.filter(customer=customer)
+    cart_items = models.Cart.objects.filter(customer=customer).select_related('product')
 
     order_details = request.session.get('order_details')
     if not order_details:
-        return redirect('customer_address')  # Redirect if no order details
+        return redirect('customer_address')
 
     with transaction.atomic():
-        orders = []
+        # First, verify stock availability for all items
         for cart_item in cart_items:
-            order_quantity = cart_item.quantity  # Assume quantity is stored in the cart
-            # Create a new order
+            if cart_item.quantity > cart_item.product.quantity:
+                return render(request, "ecom/payment_failed.html", 
+                    {"message": f"Insufficient stock for {cart_item.product.name}"})
+
+        orders = []
+        # If all stock checks pass, create orders and update stock
+        for cart_item in cart_items:
+            # Create order
             order = models.Orders(
                 customer=customer,
                 product=cart_item.product,
@@ -578,21 +624,17 @@ def payment_success_view(request):
                 email=order_details.get('email', ''),
                 mobile=order_details.get('mobile', ''),
                 address=order_details.get('address', ''),
-                quantity=order_quantity  # Store quantity in the order
+                quantity=cart_item.quantity
             )
             orders.append(order)
 
-            # Decrease the product stock based on quantity
-            if cart_item.product.quantity >= order_quantity:
-                cart_item.product.quantity -= order_quantity
-                cart_item.product.save()
-            else:
-                # Handle insufficient stock case
-                return render(request, "ecom/payment_failed.html", {"message": "Insufficient stock for product."})
+            # Update product stock
+            cart_item.product.quantity -= cart_item.quantity
+            cart_item.product.save()
 
         # Bulk create orders
         models.Orders.objects.bulk_create(orders)
-
+        
         # Clear cart and session
         cart_items.delete()
         request.session.pop('order_details', None)
@@ -646,7 +688,6 @@ def download_invoice_view(request, orderID, productID):
         "shipmentAddress": order.address,
         "orderStatus": order.status,
         "productName": product.name,
-        "productImage": product.product_image,
         "productPrice": product.price,
         "productDescription": product.description,
     }
