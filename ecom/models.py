@@ -38,6 +38,8 @@ class Product(models.Model):
         return f"{self.name} ({self.quantity} {self.unit})"
 
 
+from django.db import models
+
 class Orders(models.Model):
     STATUS = (
         ("Pending", "Pending"),
@@ -52,11 +54,15 @@ class Orders(models.Model):
     mobile = models.CharField(max_length=20, null=True)
     order_date = models.DateField(auto_now_add=True, null=True)
     status = models.CharField(max_length=50, null=True, choices=STATUS)
+    quantity = models.PositiveIntegerField(default=1)  # Ensure this line is present
+
+    def __str__(self):
+        return f"Order {self.id} by {self.customer.get_name} for {self.product.name} (Quantity: {self.quantity})"
 
 class Cart(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    
+    quantity = models.PositiveIntegerField(default=1)  # Add this line
 
     class Meta:
         unique_together = ('customer', 'product')

@@ -2,175 +2,173 @@
 {% load static %}
 {% block content %}
 
-<!-- Main Dashboard Container -->
-<div class="container-fluid px-4 py-4">
-  
-  <!-- Dashboard Header -->
-  <div class="row mb-4">
-    <div class="col">
-      <h2 class="fw-bold text-primary">Admin Dashboard</h2>
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="#">Home</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
-        </ol>
-      </nav>
+<div class="container-fluid">
+  <div class="row g-4 py-4">
+    <!-- Dashboard Header -->
+    <div class="col-12">
+      <h2 class="fw-bold text-dark">Admin Dashboard</h2>
     </div>
-  </div>
 
-  <!-- Dashboard Cards -->
-  {% include 'ecom/admin_dashboard_cards.html' %}
+    <!-- Dashboard Cards -->
+    <div class="col-12">
+      {% include 'ecom/admin_dashboard_cards.html' %}
+    </div>
 
-  <!-- Analytics Section -->
-  <div class="row mt-4">
+    <!-- Analytics Section -->
     <div class="col-12">
       <div class="card shadow-sm">
         <div class="card-header bg-white">
           <h5 class="card-title mb-0">Analytics Overview</h5>
         </div>
         <div class="card-body">
-          <div class="row">
+          <div class="row g-4">
             <div class="col-md-6">
-              <div class="chart-container" style="position: relative; height:300px;">
+              <div class="chart-container position-relative" style="height: 300px;">
                 <canvas id="ordersChart"></canvas>
               </div>
             </div>
             <div class="col-md-6">
-              <div class="chart-container" style="position: relative; height:300px;">
-                <canvas id="inventoryChart"></canvas>
+              <div class="chart-container position-relative" style="height: 300px;">
+                <canvas id="productionChart"></canvas>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Recent Bookings Section -->
-  <div class="row mt-4">
+    <!-- Sales Report and Analysis Section -->
+    <div class="col-12">
+      <div class="card shadow">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+          <h3 class="card-title mb-0">Sales Analysis</h3>
+          
+        </div>
+       
+
+          <!-- Sales Chart -->
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body">
+                  <canvas id="salesAnalysisChart" height="200"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sales Report Table -->
+          <div class="row mt-4">
+            <div class="col-12">
+              <div class="table-responsive">
+                <table class="table table-hover table-striped" id="salesTable">
+                  <thead class="table-light">
+                    <tr>
+                      <th>SN</th>
+                      <th>Customer</th>
+                      <th>Contact</th>
+                      <th>Product</th>
+                      <th>Order Date</th>
+                      <th>Price</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                      <td>{{ forloop.counter }}</td>
+                      <td>
+                        <div class="fw-bold">{{ order.customer.get_name }}</div>
+                        <div class="text-muted small">{{ order.address|truncatechars:20 }}</div>
+                      </td>
+                      <td>{{ order.customer.mobile }}</td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img src="{{ order.product.product_image.url }}" class="rounded me-2" width="40" height="40" alt="Product">
+                          <div>{{ order.product.name }}</div>
+                        </div>
+                      </td>
+                      <td>{{ order.order_date|date:"M d, Y" }}</td>
+                      <td>₹{{ order.product.price|floatformat:2 }}</td>
+                      <td>
+                        {% if order.status == 'Pending' %}
+                        <span class="badge bg-warning text-dark">{{ order.status }}</span>
+                        {% elif order.status == 'Delivered' %}
+                        <span class="badge bg-success">{{ order.status }}</span>
+                        {% elif order.status == 'Out for Delivery' %}
+                        <span class="badge bg-info">{{ order.status }}</span>
+                        {% else %}
+                        <span class="badge bg-primary">{{ order.status }}</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expiry Alerts Section -->
     <div class="col-12">
       <div class="card shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">Recent Bookings</h5>
-          <button class="btn btn-sm btn-outline-primary">View All</button>
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0 text-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>Expiry Alerts
+          </h5>
         </div>
         <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover" id="dev-table">
-              <thead class="table-light">
-                <tr>
-                  <th>Customer</th>
-                  <th>Contact</th>
-                  <th>Shipment Address</th>
-                  <th>Product</th>
-                  <th>Image</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for product, customer, order in data %}
-                <tr>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="avatar avatar-sm me-2">
-                        <div class="avatar-initial rounded-circle bg-light">
-                          {{ customer.get_name|slice:":1" }}
-                        </div>
-                      </div>
-                      <div>{{ customer.get_name }}</div>
-                    </div>
-                  </td>
-                  <td>{{ customer.mobile }}</td>
-                  <td>
-                    <span class="text-truncate d-inline-block" style="max-width: 200px;">
-                      {{ order.address }}
-                    </span>
-                  </td>
-                  <td>{{ product.name }}</td>
-                  <td>
-                  <img src="{{ product.product_image.url }}" class="rounded" alt="Product Image" height="40px" width="40px" />
-
-                  </td>
-                  <td>
-                    {% if order.status == 'Pending' %}
-                    <span class="badge bg-warning text-dark">{{ order.status }}</span>
-                    {% elif order.status == 'Delivered' %}
-                    <span class="badge bg-success">{{ order.status }}</span>
-                    {% elif order.status == 'Out for Delivery' %}
-                    <span class="badge bg-info">{{ order.status }}</span>
-                    {% else %}
-                    <span class="badge bg-primary">{{ order.status }}</span>
-                    {% endif %}
-                  </td>
-                </tr>
+          <div class="row g-4">
+            <div class="col-md-4">
+              <h6 class="fw-bold mb-3">Expired Products</h6>
+              <div class="list-group">
+                {% for product in expired_products %}
+                <div class="list-group-item list-group-item-secondary d-flex justify-content-between align-items-center">
+                  <div>
+                    <i class="fas fa-times-circle me-2"></i>
+                    {{ product.name }}
+                  </div>
+                  <span class="badge bg-danger text-white">
+                    Expired: {{ product.expiry_date }}
+                  </span>
+                </div>
                 {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-      </div>
-    </div>
-  </div>
-
-  <!-- Expiry Alerts Section -->
-  <!-- Expiry Alerts Section -->
-<div class="row mt-4">
-  <div class="col-12">
-    <div class="card shadow-sm">
-      <div class="card-header bg-white">
-        <h5 class="card-title mb-0 text-danger">
-          <i class="fas fa-exclamation-triangle me-2"></i>Expiry Alerts
-        </h5>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-4">
-            <h6 class="fw-bold mb-3">Expired Products</h6>
-            <div class="list-group">
-              {% for product in expired_products %}
-              <div class="list-group-item list-group-item-secondary d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="fas fa-times-circle me-2"></i>
-                  {{ product.name }}
-                </div>
-                <span class="badge bg-danger text-white">
-                  Expired: {{ product.expiry_date }}
-                </span>
               </div>
-              {% endfor %}
             </div>
-          </div>
-          <div class="col-md-4">
-            <h6 class="fw-bold mb-3">Warning (7 Days)</h6>
-            <div class="list-group">
-              {% for product in expiry_7_days %}
-              <div class="list-group-item list-group-item-warning d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="fas fa-clock me-2"></i>
-                  {{ product.name }}
+            <div class="col-md-4">
+              <h6 class="fw-bold mb-3">Warning (7 Days)</h6>
+              <div class="list-group">
+                {% for product in expiry_7_days %}
+                <div class="list-group-item list-group-item-warning d-flex justify-content-between align-items-center">
+                  <div>
+                    <i class="fas fa-clock me-2"></i>
+                    {{ product.name }}
+                  </div>
+                  <span class="badge bg-warning text-dark">
+                    {{ product.quantity }} {{ product.unit }}
+                  </span>
                 </div>
-                <span class="badge bg-warning text-dark">
-                  {{ product.quantity }} {{ product.unit }}
-                </span>
+                {% endfor %}
               </div>
-              {% endfor %}
             </div>
-          </div>
-          <div class="col-md-4">
-            <h6 class="fw-bold mb-3">Critical (30 Days)</h6>
-            <div class="list-group">
-              {% for product in expiry_30_days %}
-              <div class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="fas fa-exclamation-circle me-2"></i>
-                  {{ product.name }}
+            <div class="col-md-4">
+              <h6 class="fw-bold mb-3">Critical (30 Days)</h6>
+              <div class="list-group">
+                {% for product in expiry_30_days %}
+                <div class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center">
+                  <div>
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    {{ product.name }}
+                  </div>
+                  <span class="badge bg-danger">
+                    {{ product.quantity }} {{ product.unit }}
+                  </span>
                 </div>
-                <span class="badge bg-danger">
-                  {{ product.quantity }} {{ product.unit }}
-                </span>
+                {% endfor %}
               </div>
-              {% endfor %}
             </div>
           </div>
         </div>
@@ -179,9 +177,6 @@
   </div>
 </div>
 
-</div>
-
-<!-- Chart.js Script -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   // Orders Chart
@@ -224,52 +219,146 @@
         }
       },
       scales: {
-        y: {
-          beginAtZero: true
-        }
+        y: { beginAtZero: true }
       }
     }
   });
 
-  // Inventory Chart
-  const inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
-  const inventoryChart = new Chart(inventoryCtx, {
-    type: 'doughnut',
+  // Product Production Chart
+  const productionCtx = document.getElementById('productionChart').getContext('2d');
+  const productionChart = new Chart(productionCtx, {
+    type: 'bar',
     data: {
-      labels: ['Low Stock', 'High Stock'],
+      labels: {{ production_labels|safe }},
       datasets: [{
-        data: [
-          {{ low_stock_products.count }},
-          {{ high_stock_products.count }}
-        ],
+        data: {{ production_quantities|safe }},
         backgroundColor: [
-          'rgba(231, 76, 60, 0.7)',
-          'rgba(46, 204, 113, 0.7)'
+          'rgba(75, 192, 192, 0.2)',
+          'rgba(153, 102, 255, 0.2)',
+          'rgba(255, 159, 64, 0.2)',
+          'rgba(54, 162, 235, 0.2)',
+          'rgba(255, 99, 132, 0.2)',
         ],
         borderColor: [
-          'rgb(231, 76, 60)',
-          'rgb(46, 204, 113)'
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 99, 132, 1)',
         ],
         borderWidth: 1
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
       plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            padding: 20
-          }
-        },
         title: {
           display: true,
-          text: 'Inventory Status'
+          text: 'Product Production Distribution by Date'
         }
       }
     }
   });
-</script>
 
+// Sales Analysis Chart
+const salesAnalysisCtx = document.getElementById('salesAnalysisChart').getContext('2d');
+new Chart(salesAnalysisCtx, {
+  type: 'bar',
+  data: {
+    labels: [
+      'Total Sales' + '\n(All Products)', 
+      'Highest Sales' + '\n({{ highest_sales_product }})', 
+      'Lowest Sales' + '\n({{ lowest_sales_product }})'
+    ],
+    datasets: [{
+      label: 'Sales Analysis',
+      data: [{{ total_sales }}, {{ highest_sales }}, {{ lowest_sales }}],
+      backgroundColor: [
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(255, 99, 132, 0.6)',
+        'rgba(255, 205, 86, 0.6)'
+      ],
+      borderColor: [
+        'rgb(75, 192, 192)',
+        'rgb(255, 99, 132)',
+        'rgb(255, 205, 86)'
+      ],
+      borderWidth: 1,
+      barThickness: 60, // Reduced from 80
+      maxBarThickness: 70, // Reduced from 90
+      categoryPercentage: 0.8, // Controls spacing between bar groups
+      barPercentage: 0.9 // Controls width of bars within groups
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    aspectRatio: 2.5, // Increased from 2 to make it shorter
+    plugins: {
+      title: {
+        display: true,
+        text: 'Sales Analysis Overview',
+        font: {
+          size: 14
+        },
+        padding: { bottom: 10 } // Reduced padding after title
+      },
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `Sales: Rs.${context.raw.toLocaleString()}`;
+          },
+          title: function(context) {
+            return context[0].label.replace('\n', ' - ');
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Amount (Rs.)',
+          font: {
+            size: 12
+          },
+          padding: { top: 0, bottom: 0 } // Reduced padding for axis title
+        },
+        ticks: {
+          font: {
+            size: 12
+          },
+          callback: function(value) {
+            return 'Rs.' + value.toLocaleString();
+          },
+          padding: 5 // Reduced padding for tick labels
+        }
+      },
+      x: {
+        ticks: {
+          font: {
+            size: 12
+          },
+          autoSkip: false,
+          maxRotation: 0,
+          padding: 5 // Reduced padding between labels
+        }
+      }
+    },
+    layout: {
+      padding: {
+        left: 5,  // Reduced from 10
+        right: 5, // Reduced from 10
+        top: 5,   // Reduced from 10
+        bottom: 15 // Reduced from 20
+      }
+    }
+  }
+});
+  
+</script>
 {% endblock content %}

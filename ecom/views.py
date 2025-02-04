@@ -115,7 +115,11 @@ from .models import Customer, Product, Orders
 from datetime import date, timedelta
 from django.shortcuts import render
 
+from collections import defaultdict
+from django.db.models import Sum, F
 
+from .models import Orders, Customer, Product, ProductProduction
+from django.db.models.functions import TruncWeek
 
 def admin_dashboard_view(request):
     # Counts for dashboard cards
@@ -135,25 +139,13 @@ def admin_dashboard_view(request):
     order_count = Orders.objects.count()
 
     # Recent Orders Data
-    recent_orders = Orders.objects.select_related("customer", "product").order_by(
-        "-order_date"
-    )[:10]
+    recent_orders = Orders.objects.select_related("customer", "product").order_by("-order_date")[:10]
 
     # Expiry Alerts
     today = date.today()
     expired_products = Product.objects.filter(expiry_date__lt=today)
-    expiry_7_days = Product.objects.filter(
-        expiry_date__range=[today, today + timedelta(days=7)]
-    )
-    expiry_30_days = Product.objects.filter(
-        expiry_date__range=[today + timedelta(days=8), today + timedelta(days=30)]
-    )
-
-    # Inventory Monitoring
-    low_stock_products = Product.objects.filter(
-        quantity__lt=10
-    )  # Example threshold for low stock
-    high_stock_products = Product.objects.filter(quantity__gte=10)
+    expiry_7_days = Product.objects.filter(expiry_date__range=[today, today + timedelta(days=7)])
+    expiry_30_days = Product.objects.filter(expiry_date__range=[today + timedelta(days=8), today + timedelta(days=30)])
 
     # Orders Status Distribution
     order_status_count = {
@@ -163,22 +155,75 @@ def admin_dashboard_view(request):
         "Delivered": Orders.objects.filter(status="Delivered").count(),
     }
 
+    # Product production data for the chart
+    product_productions = ProductProduction.objects.all()
+
+    # Group production data by product and date
+    production_data = defaultdict(lambda: defaultdict(float))
+    
+    for production in product_productions:
+        production_data[production.product.name][production.production_date] += production.quantity_produced
+
+    # Prepare data for the chart
+    production_labels = []
+    production_quantities = []
+    production_dates = []
+
+    # Flatten the grouped data to match a pie chart or bar chart format
+    for product_name, date_data in production_data.items():
+        for production_date, total_quantity in date_data.items():
+            production_labels.append(f"{product_name} ({production_date})")
+            production_quantities.append(total_quantity)
+            production_dates.append(production_date)
+
+    # Sales Data - Total Sales (for total sales analysis)
+    total_sales = Orders.objects.aggregate(
+        total_sales=Sum(F('product__price') * F('quantity'))
+    )['total_sales'] or 0
+
+    # Highest Sales (highest sales in a single order)
+    highest_sales_order = Orders.objects.annotate(
+        total_sales=Sum(F('product__price') * F('quantity'))
+    ).order_by('-total_sales').first()
+
+    highest_sales = highest_sales_order.total_sales if highest_sales_order else 0
+    highest_sales_product = highest_sales_order.product.name if highest_sales_order else 'N/A'
+
+    # Lowest Sales (lowest sales in a single order)
+    lowest_sales_order = Orders.objects.annotate(
+        total_sales=Sum(F('product__price') * F('quantity'))
+    ).order_by('total_sales').first()
+
+    lowest_sales = lowest_sales_order.total_sales if lowest_sales_order else 0
+    lowest_sales_product = lowest_sales_order.product.name if lowest_sales_order else 'N/A'
+
+    # Total Orders (Count of all orders)
+    total_orders = Orders.objects.count()
+
+    # Context for rendering the dashboard
     context = {
         "data": data,
         "customercount": customer_count,
         "productcount": product_count,
         "ordercount": order_count,
+        "total_sales": total_sales,
+        "total_orders": total_orders,
+        "highest_sales": highest_sales,
+        "highest_sales_product": highest_sales_product,
+        "lowest_sales": lowest_sales,
+        "lowest_sales_product": lowest_sales_product,
         "recent_orders": recent_orders,
         "expired_products": expired_products,
         "expiry_7_days": expiry_7_days,
         "expiry_30_days": expiry_30_days,
-        "low_stock_products": low_stock_products,
-        "high_stock_products": high_stock_products,
         "order_status_count": order_status_count,
+        "production_labels": production_labels,
+        "production_quantities": production_quantities,
+        "production_dates": production_dates,
+        
     }
 
     return render(request, "ecom/admin_dashboard.html", context)
-
 
 
 def add_product_production_view(request):
@@ -512,18 +557,19 @@ def customer_address_view(request):
 
 
 from django.db import transaction  # Add this import
-
 @login_required(login_url="customerlogin")
 def payment_success_view(request):
     customer = get_object_or_404(models.Customer, user=request.user)
     cart_items = models.Cart.objects.filter(customer=customer)
 
-    order_details = request.session.get('order_details', {})
+    order_details = request.session.get('order_details')
+    if not order_details:
+        return redirect('customer_address')  # Redirect if no order details
 
     with transaction.atomic():
         orders = []
         for cart_item in cart_items:
-            order_quantity = 1  # Assume 1 unit for now, adjust based on user input if needed
+            order_quantity = cart_item.quantity  # Assume quantity is stored in the cart
             # Create a new order
             order = models.Orders(
                 customer=customer,
@@ -537,8 +583,12 @@ def payment_success_view(request):
             orders.append(order)
 
             # Decrease the product stock based on quantity
-            cart_item.product.quantity -= order_quantity
-            cart_item.product.save()
+            if cart_item.product.quantity >= order_quantity:
+                cart_item.product.quantity -= order_quantity
+                cart_item.product.save()
+            else:
+                # Handle insufficient stock case
+                return render(request, "ecom/payment_failed.html", {"message": "Insufficient stock for product."})
 
         # Bulk create orders
         models.Orders.objects.bulk_create(orders)
@@ -548,7 +598,6 @@ def payment_success_view(request):
         request.session.pop('order_details', None)
 
     return render(request, "ecom/payment_success.html", {"orders": orders})
-
 
 @login_required(login_url="customerlogin")
 @user_passes_test(is_customer)
