@@ -16,6 +16,7 @@
               <th scope="col">SN</th>
               <th scope="col">Name</th>
               <th scope="col">Image</th>
+              <th scope="col">Quantity</th>
               <th scope="col">Price</th>
               <th scope="col">Action</th>
             </tr>
@@ -28,7 +29,10 @@
                 <td>
                   <img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded-3" style="max-width: 60px; max-height: 60px; object-fit: cover;">
                 </td>
+                <td>{{ item.product.quantity }} {{ item.product.unit }}</td>  
                 <td>Rs. {{ item.product.price }}</td>
+                        <!-- Display Quantity -->
+                     <!-- Display Unit -->
                 <td>
                   <a class="btn btn-danger btn-sm" href="{% url 'remove-from-cart' item.id %}" role="button">
                     <i class="bi bi-trash"></i> Remove
@@ -39,8 +43,8 @@
           </tbody>
           <tfoot>
             <tr class="fw-semibold bg-light">
-              <td colspan="3" class="text-end">Total</td>
-              <td colspan="2">Rs. {{ total }}</td>
+              <td colspan="4" class="text-end">Total</td>
+              <td colspan="3">Rs. {{ total }}</td>  <!-- Total Price -->
             </tr>
           </tfoot>
         </table>

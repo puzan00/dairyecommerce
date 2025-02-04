@@ -10,7 +10,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.contrib.auth import logout
-from .models import Cart, Product, Customer,ProductProduction
+from .models import Cart, Product, Customer,ProductProduction,Orders
 from django.db import transaction
 
 
@@ -123,7 +123,8 @@ from .models import Orders, Customer, Product, ProductProduction
 from django.db.models.functions import TruncWeek
 
 
-
+from collections import defaultdict
+from datetime import date, timedelta
 
 def admin_dashboard_view(request):
     # Counts for dashboard cards
@@ -167,22 +168,28 @@ def admin_dashboard_view(request):
     # Product production data for the chart
     product_productions = ProductProduction.objects.all()
 
-    # Group production data by product and date
-    production_data = defaultdict(lambda: defaultdict(float))
+    # Group production data by date first, then product name
+    production_data = defaultdict(list)
 
     for production in product_productions:
-        production_data[production.product.name][production.production_date] += production.quantity_produced
+        production_data[production.production_date].append({
+            'product_name': production.product.name,
+            'quantity_produced': production.quantity_produced,
+        })
 
-    # Prepare data for the chart
+    # Prepare data for the chart, sorting by production_date in ascending order
     production_labels = []
     production_quantities = []
     production_dates = []
 
-    # Flatten the grouped data to match a pie chart or bar chart format
-    for product_name, date_data in production_data.items():
-        for production_date, total_quantity in date_data.items():
-            production_labels.append(f"{product_name} ({production_date})")
-            production_quantities.append(total_quantity)
+    # Sort by production date (ascending order)
+    sorted_production_dates = sorted(production_data.keys())
+
+    for production_date in sorted_production_dates:
+        for entry in production_data[production_date]:
+            production_labels.append(f"{entry['product_name']} ({production_date.strftime('%m-%d')})")
+
+            production_quantities.append(entry['quantity_produced'])
             production_dates.append(production_date)
 
     # Sales Data - Total Sales (for total sales analysis)
@@ -240,6 +247,8 @@ def admin_dashboard_view(request):
     }
 
     return render(request, "ecom/admin_dashboard.html", context)
+
+
 
 
 def add_product_production_view(request):
@@ -533,11 +542,20 @@ def customer_home_view(request):
     # Get all products
     products = Product.objects.all()
 
-    # Check if the product is already in any cart (if a product is added to cart, it's out of stock)
-    out_of_stock_products = products.filter(cart__isnull=False).distinct()
+    # Identify out-of-stock products based on order statuses
+    out_of_stock_products = products.filter(
+        orders__status__in=["Pending", "Order Confirmed", "Out for Delivery", "Delivered"]
+    ).distinct()
+
+    # Products that are still in stock
     in_stock_products = products.exclude(id__in=out_of_stock_products)
 
-    product_count_in_cart = Cart.objects.filter(customer__user=request.user).count()
+    # Fetch the current customer's cart items
+    customer = get_object_or_404(Customer, user=request.user)
+    cart_items = Cart.objects.filter(customer=customer)
+
+    # Count the number of items in the cart
+    product_count_in_cart = cart_items.count()
 
     return render(
         request,
@@ -548,7 +566,6 @@ def customer_home_view(request):
             "product_count_in_cart": product_count_in_cart,
         }
     )
-
 # shipment address before placing order
 
 

@@ -128,70 +128,73 @@
 </div>
 </div>
 
-    <!-- Expiry Alerts Section -->
-    <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-header bg-white">
-          <h5 class="card-title mb-0 text-danger">
-            <i class="fas fa-exclamation-triangle me-2"></i>Expiry Alerts
-          </h5>
+   <!-- Expiry Alerts Section -->
+<div class="col-12">
+  <div class="card shadow-sm">
+    <div class="card-header bg-white">
+      <h5 class="card-title mb-0 text-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>Expiry Alerts
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <h6 class="fw-bold mb-3">Expired Products</h6>
+          <div class="list-group">
+            {% for product in expired_products %}
+            <div class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center"> <!-- Changed to 'danger' for red -->
+              <div>
+                <i class="fas fa-times-circle me-2"></i>
+                {{ product.name }}
+              </div>
+              <span class="badge bg-danger text-white">
+                Expired: {{ product.expiry_date }}
+              </span>
+            </div>
+            {% endfor %}
+          </div>
         </div>
-        <div class="card-body">
-          <div class="row g-4">
-            <div class="col-md-4">
-              <h6 class="fw-bold mb-3">Expired Products</h6>
-              <div class="list-group">
-                {% for product in expired_products %}
-                <div class="list-group-item list-group-item-secondary d-flex justify-content-between align-items-center">
-                  <div>
-                    <i class="fas fa-times-circle me-2"></i>
-                    {{ product.name }}
-                  </div>
-                  <span class="badge bg-danger text-white">
-                    Expired: {{ product.expiry_date }}
-                  </span>
-                </div>
-                {% endfor %}
+        <div class="col-md-4">
+          <h6 class="fw-bold mb-3">Warning (7 Days)</h6>
+          <div class="list-group">
+            {% for product in expiry_7_days %}
+            <div class="list-group-item list-group-item-warning d-flex justify-content-between align-items-center" 
+                 title="Expires on: {{ product.expiry_date|date:'M d, Y' }}">
+              <div>
+                <i class="fas fa-clock me-2"></i>
+                {{ product.name }}
               </div>
+              <span class="badge bg-warning text-dark">
+                {{ product.quantity }} {{ product.unit }}
+              </span>
             </div>
-            <div class="col-md-4">
-              <h6 class="fw-bold mb-3">Warning (7 Days)</h6>
-              <div class="list-group">
-                {% for product in expiry_7_days %}
-                <div class="list-group-item list-group-item-warning d-flex justify-content-between align-items-center">
-                  <div>
-                    <i class="fas fa-clock me-2"></i>
-                    {{ product.name }}
-                  </div>
-                  <span class="badge bg-warning text-dark">
-                    {{ product.quantity }} {{ product.unit }}
-                  </span>
-                </div>
-                {% endfor %}
+            {% endfor %}
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <h6 class="fw-bold mb-3">Expiring Soon (30 Days)</h6>
+          <div class="list-group">
+            {% for product in expiry_30_days %}
+            <div class="list-group-item list-group-item-success d-flex justify-content-between align-items-center" 
+                 title="Expires on: {{ product.expiry_date|date:'M d, Y' }}">
+              <div>
+                <i class="fas fa-exclamation-circle me-2"></i>
+                {{ product.name }}
               </div>
+              <span class="badge bg-success text-white">
+                {{ product.quantity }} {{ product.unit }}
+              </span>
             </div>
-            <div class="col-md-4">
-              <h6 class="fw-bold mb-3">Critical (30 Days)</h6>
-              <div class="list-group">
-                {% for product in expiry_30_days %}
-                <div class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center">
-                  <div>
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    {{ product.name }}
-                  </div>
-                  <span class="badge bg-danger">
-                    {{ product.quantity }} {{ product.unit }}
-                  </span>
-                </div>
-                {% endfor %}
-              </div>
-            </div>
+            {% endfor %}
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -241,40 +244,105 @@
   });
 
   // Product Production Chart
-  const productionCtx = document.getElementById('productionChart').getContext('2d');
-  const productionChart = new Chart(productionCtx, {
-    type: 'bar',
-    data: {
-      labels: {{ production_labels|safe }},
-      datasets: [{
-        data: {{ production_quantities|safe }},
-        backgroundColor: [
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 99, 132, 0.2)',
-        ],
-        borderColor: [
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 99, 132, 1)',
-        ],
-        borderWidth: 1
-      }]
+// Dynamic Colors for Bars
+const generateColors = (count) => {
+  const backgroundColors = [];
+  const borderColors = [];
+  const colorPalette = [
+    'rgba(75, 192, 192, 0.2)',
+    'rgba(153, 102, 255, 0.2)',
+    'rgba(255, 159, 64, 0.2)',
+    'rgba(54, 162, 235, 0.2)',
+    'rgba(255, 99, 132, 0.2)',
+    'rgba(255, 205, 86, 0.2)',
+    'rgba(201, 203, 207, 0.2)'
+  ];
+
+  const borderPalette = [
+    'rgba(75, 192, 192, 1)',
+    'rgba(153, 102, 255, 1)',
+    'rgba(255, 159, 64, 1)',
+    'rgba(54, 162, 235, 1)',
+    'rgba(255, 99, 132, 1)',
+    'rgba(255, 205, 86, 1)',
+    'rgba(201, 203, 207, 1)'
+  ];
+
+  for (let i = 0; i < count; i++) {
+    backgroundColors.push(colorPalette[i % colorPalette.length]);
+    borderColors.push(borderPalette[i % borderPalette.length]);
+  }
+
+  return { backgroundColors, borderColors };
+};
+
+// Fetch data from Django context
+const labels = {{ production_labels|safe }};
+const dataPoints = {{ production_quantities|safe }};
+const { backgroundColors, borderColors } = generateColors(labels.length);
+
+// Product Production Chart
+const productionCtx = document.getElementById('productionChart').getContext('2d');
+const productionChart = new Chart(productionCtx, {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Quantity Produced',
+      data: dataPoints,
+      backgroundColor: backgroundColors,
+      borderColor: borderColors,
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Daily Product Production Overview',
+        font: {
+          size: 18,
+          weight: 'bold'
+        }
+      },
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            return `${context.dataset.label}: ${context.raw} units`;
+          }
+        }
+      }
     },
-    options: {
-      responsive: true,
-      plugins: {
+    scales: {
+      y: {
+        beginAtZero: true,
         title: {
           display: true,
-          text: 'Product Production Distribution by Date'
+          text: 'Quantity Produced',
+          font: {
+            size: 14
+          }
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text:new Date().getFullYear(),
+          font: {
+            size: 14
+          }
         }
       }
     }
-  });
+  }
+});
+
+
 
 // Sales Analysis Chart
 const salesAnalysisCtx = document.getElementById('salesAnalysisChart').getContext('2d');
