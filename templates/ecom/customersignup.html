@@ -69,10 +69,10 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById("signupForm");
-    const passwordField = document.querySelector("#{{ userForm.password.id_for_label }}");
+    const passwordField = document.querySelector("input[name='password']");
     const passwordError = document.getElementById("passwordError");
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", function(e) {
       const password = passwordField.value;
       const strongPasswordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -94,11 +94,9 @@
 
   .transition-card:hover {
     transform: translateY(-10px);
-    
   }
 
   .card {
-    
     backdrop-filter: blur(5px);
     border-radius: 1rem;
   }
@@ -113,7 +111,6 @@
   }
 
   .btn-primary {
-    
     background-color: #0d6efd;
     border-color: #0d6efd;
   }
@@ -126,6 +123,21 @@
   .form-control:focus {
     border-color: #0d6efd;
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 576px) {
+    .container {
+      padding: 0 15px;
+    }
+
+    .col-md-6, .col-12 {
+      padding: 5px;
+    }
+
+    .card {
+      margin-top: 10px;
+    }
   }
 </style>
 {% endblock %}

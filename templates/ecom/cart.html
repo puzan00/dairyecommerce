@@ -14,8 +14,8 @@
           <thead class="table-light">
             <tr>
               <th scope="col">SN</th>
-              <th scope="col">Name</th>
-              <th scope="col">Image</th>
+              <th scope="col">Product Name</th>
+              
               <th scope="col">Quantity</th>
               <th scope="col">Price</th>
               <th scope="col">Action</th>
@@ -25,10 +25,8 @@
             {% for item in cart_items %}
               <tr>
                 <td>{{ forloop.counter }}</td>
-                <td class="fw-semibold">{{ item.product.name }}</td>
-                <td>
-                  <img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded-3" style="max-width: 60px; max-height: 60px; object-fit: cover;">
-                </td>
+                <td class="fw-semibold"><img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded-3" style="max-width: 60px; max-height: 60px; object-fit: cover;"> {{ item.product.name }}</td>
+
                 <td>{{ item.product.quantity }} {{ item.product.unit }}</td>  
                 <td>Rs. {{ item.product.price }}</td>
                         <!-- Display Quantity -->

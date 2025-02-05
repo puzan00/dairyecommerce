@@ -14,22 +14,6 @@ from .models import Cart, Product, Customer,ProductProduction,Orders
 from django.db import transaction
 
 
-def increase_quantity(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    product.quantity += 1
-    product.save()
-    return redirect("cart")
-
-
-def decrease_quantity(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    if product.quantity > 1:  # Prevent reducing quantity below 1
-        product.quantity -= 1
-        product.save()
-    return redirect("cart")
-
-
-
 def home_view(request):
     products = models.Product.objects.all()
 
@@ -281,6 +265,32 @@ def add_product_production_view(request):
     context = {'products': products}
     return render(request, 'ecom/add_product_production.html', context)
 
+def edit_product_production_view(request, production_id):
+    production = ProductProduction.objects.get(id=production_id)
+    products = Product.objects.all()
+
+    if request.method == 'POST':
+        production.product_id = request.POST.get('product')
+        production.quantity_produced = request.POST.get('quantity_produced')
+        production.production_date = request.POST.get('production_date')
+        production.save()
+        return redirect('product-production-list')
+
+    context = {
+        'production': production,
+        'products': products,
+    }
+    return render(request, 'ecom/edit_product_production.html', context)
+
+def delete_product_production_view(request, production_id):
+    production = get_object_or_404(ProductProduction, id=production_id)
+
+    if request.method == 'POST':
+        production.delete()
+        return redirect('product-production-list')  # Redirect to the same page to refresh the list
+
+    # If method is not POST, render confirmation or the list page directly
+    return redirect('product-production-list')
 
 from datetime import date
 
@@ -322,37 +332,7 @@ def view_customer_view(request):
     return render(request, "ecom/view_customer.html", {"customers": customers})
 
 
-# admin delete customer
-# @login_required(login_url="adminlogin")
-# def delete_customer_view(request, pk):
-#     customer = models.Customer.objects.get(id=pk)
-#     user = models.User.objects.get(id=customer.user_id)
-#     user.delete()
-#     customer.delete()
-#     return redirect("view-customer")
 
-
-# @login_required(login_url="adminlogin")
-# def update_customer_view(request, pk):
-#     customer = models.Customer.objects.get(id=pk)
-#     user = models.User.objects.get(id=customer.user_id)
-#     userForm = forms.CustomerUserForm(instance=user)
-#     customerForm = forms.CustomerForm(request.FILES, instance=customer)
-#     mydict = {"userForm": userForm, "customerForm": customerForm}
-    
-#     if request.method == "POST":
-#         userForm = forms.CustomerUserForm(request.POST, instance=user)
-#         customerForm = forms.CustomerForm(request.POST, instance=customer)
-        
-#         if userForm.is_valid() and customerForm.is_valid():
-#             user = userForm.save(commit=False)  # Don't save user yet
-#             if userForm.cleaned_data.get('password'):
-#                 user.set_password(userForm.cleaned_data['password'])  # Set new password only if provided
-#             user.save()  # Save the user object
-#             customerForm.save()  # Save the customer form
-#             return redirect("view-customer")
-    
-#     return render(request, "ecom/admin_update_customer.html", context=mydict)
 
 # admin view the product
 @login_required(login_url="adminlogin")
@@ -536,19 +516,27 @@ def remove_from_cart_view(request, pk):
 # ---------------------------------------------------------------------------------
 # ------------------------ CUSTOMER RELATED VIEWS START ------------------------------
 # ---------------------------------------------------------------------------------
+from django.utils import timezone
+
 @login_required(login_url="customerlogin")
 @user_passes_test(is_customer)
 def customer_home_view(request):
     # Get all products
     products = Product.objects.all()
 
+    # Get current date to compare expiry date
+    today = timezone.now().date()
+
     # Identify out-of-stock products based on order statuses
     out_of_stock_products = products.filter(
         orders__status__in=["Pending", "Order Confirmed", "Out for Delivery", "Delivered"]
     ).distinct()
 
-    # Products that are still in stock
-    in_stock_products = products.exclude(id__in=out_of_stock_products)
+    # Filter expired products
+    expired_products = products.filter(expiry_date__lt=today)
+
+    # Products that are still in stock and not expired
+    in_stock_products = products.exclude(id__in=out_of_stock_products).exclude(id__in=expired_products)
 
     # Fetch the current customer's cart items
     customer = get_object_or_404(Customer, user=request.user)

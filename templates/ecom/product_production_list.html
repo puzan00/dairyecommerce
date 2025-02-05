@@ -2,106 +2,146 @@
 {% load custom_filters %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white d-flex justify-content-between">
-            <h4 class="mb-0">Product Production List</h4>
-            <!-- Add Product Production Button -->
-            <a href="{% url 'add-product-production' %}" class="btn btn-success">Add Product Production</a>
-        </div>
-        <div class="card-body">
-            <!-- Search Form -->
-            <form class="mb-3" id="searchForm">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search by product name or production date">
-            </form>
+<div class="container-fluid mt-4">
+    <h2 class="mb-3">Product Production Management</h2>
+    <hr style="border: 0; height: 3px; background-color: #4CAF50; margin-top: 15px; margin-bottom: 20px;">
 
-            <!-- Scrollable Table Section -->
-            <div style="max-height: 400px; overflow-y: auto; position: relative;">
-                <table class="table table-striped" id="productionTable">
-                    <thead style="position: sticky; top: 0; background-color: #f8f9fc; z-index: 1;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">Product Production List</h4>
+        <div class="input-group w-25">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search productions...">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+        </div>
+        <a href="{% url 'add-product-production' %}" class="btn btn-success">
+            <i class="fas fa-plus-circle me-2"></i>Add Production
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-5">
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-hover mb-0 text-center" id="productionTable">
+                    <thead class="bg-dark text-white sticky-top">
                         <tr>
-                            <th scope="col">SN.</th> <!-- Serial Number Column -->
+                            <th scope="col">SN.</th>
                             <th scope="col">Product</th>
                             <th scope="col">Quantity Produced</th>
                             <th scope="col">Production Date</th>
+                            <th scope="col">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for production in product_productions %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td> <!-- Display serial number -->
+                            <tr id="production-{{ production.id }}">
+                                <td>{{ forloop.counter }}</td>
                                 <td>{{ production.product.name }}</td>
-                                <td>{{ production.quantity_produced }}{{ production.product.unit }}</td>
-                                <td class="production-date" data-date="{{ production.production_date }}">
-                                    {{ production.production_date }}
+                                <td>{{ production.quantity_produced }} {{ production.product.unit }}</td>
+                                <td class="production-date" data-date="{{ production.production_date|date:'Y-m-d' }}">
+                                    {{ production.production_date|date:"F j, Y" }}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'edit-production' production.id %}" class="btn btn-sm btn-outline-primary" title="Edit production">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <span class="mx-1"></span>
+                                        <form method="post" action="{% url 'delete-production' production.id %}" style="display:inline-block;" onsubmit="return confirmDelete();">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete production">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="4" class="text-center">No product production records available.</td>
+                                <td colspan="5" class="text-center text-muted">No product production records available.</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-
-           <!-- Display total quantity produced per product and production date -->
-<div class="mt-3">
-    <h5>Total Quantity Produced Per Product</h5>
-    <ul>
-        {% for product, totals in product_totals.items %}
-            <h6>{{ product.name }} (Total: {{ totals.total_quantity }}{{ product.unit }})</h6>
-            <ul>
-                {% for date, total_quantity in totals.dates.items %}
-                    <li>{{ date|date:"F j, Y" }}: {{ total_quantity }}{{ product.unit }}</li>
-                {% endfor %}
-            </ul>
-        {% empty %}
-            <p>No product production totals available.</p>
-        {% endfor %}
-    </ul>
-</div>
-
         </div>
     </div>
+
+    <!-- Production Summary -->
+  
+    <div class="mt-5">
+        <h4 class="mb-4">Production Summary by Product</h4>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for product, totals in product_totals.items %}
+                <div class="col">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-dark text-white py-2">
+                            <h5 class="mb-0 text-center text-truncate">{{ product.name }}</h5>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="card-subtitle text-muted mb-0">Total Production:</h6>
+                                <p class="card-text fs-5 fw-bold mb-0">{{ totals.total_quantity }} {{ product.unit }}</p>
+                            </div>
+                            <h6 class="text-muted mb-2">Production History</h6>
+                            <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                <table class="table table-sm table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th class="text-end">Quantity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for date, total_quantity in totals.dates.items %}
+                                            <tr>
+                                                <td class="small">{{ date|date:"M j, Y" }}</td>
+                                                <td class="text-end">
+                                                    <span class="badge bg-secondary rounded-pill">
+                                                        {{ total_quantity }} {{ product.unit }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info text-center" role="alert">
+                        No product production totals available.
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
 
 <script>
-    // Function to filter table rows based on search input
     document.getElementById("searchInput").addEventListener("input", function() {
         var searchValue = this.value.toLowerCase();
-        var table = document.getElementById("productionTable");
-        var rows = table.getElementsByTagName("tr");
+        var rows = document.querySelectorAll("#productionTable tbody tr");
 
-        for (var i = 1; i < rows.length; i++) {
-            var row = rows[i];
-            var cells = row.getElementsByTagName("td");
-            var productName = cells[1].textContent.toLowerCase();
-            var productionDate = cells[3].textContent.toLowerCase();
+        rows.forEach(function(row) {
+            var productName = row.cells[1].textContent.toLowerCase();
+            var productionDate = row.cells[3].textContent.toLowerCase();
 
-            // Check if any column contains the search value
-            if (productName.indexOf(searchValue) > -1 || productionDate.indexOf(searchValue) > -1) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        }
+            row.style.display = (productName.includes(searchValue) || productionDate.includes(searchValue)) ? "" : "none";
+        });
     });
 
-    // Format all production dates after page load
     window.onload = function() {
-        var dateCells = document.querySelectorAll('.production-date');
-        dateCells.forEach(function(cell) {
-            var originalDate = new Date(cell.getAttribute('data-date'));
-            var formattedDate = formatDate(originalDate);
-            cell.textContent = formattedDate; // Update the table with formatted date
+        document.querySelectorAll('.production-date').forEach(function(cell) {
+            var date = new Date(cell.getAttribute('data-date'));
+            cell.textContent = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         });
     };
 
-    // Function to format date into "Month Day, Year" format
-    function formatDate(date) {
-        var options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return date.toLocaleDateString('en-US', options);
+    // JavaScript function to confirm deletion
+    function confirmDelete() {
+        return confirm('Do you really want to delete this production? This action cannot be undone.');
     }
 </script>
 {% endblock %}

@@ -4,19 +4,19 @@ from . import models
 
 
 class CustomerUserForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=False)  # Make password optional
+    password = forms.CharField(widget=forms.PasswordInput, required=True)  # Make password optional
 
     class Meta:
         model = User
         fields = ["first_name", "last_name", "username", "password"]
-    profile_pic = forms.ImageField(required=True)
+        profile_pic = forms.ImageField(required=True)
 
 
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = models.Customer
         fields = ["address", "mobile", "profile_pic"]
-    profile_pic = forms.ImageField(required=True)
+        profile_pic = forms.ImageField(required=True)
 class EditProfileForm(forms.ModelForm):
     class Meta:
         model = User
@@ -26,7 +26,7 @@ class EditCustomerForm(forms.ModelForm):
     class Meta:
         model = models.Customer
         fields = ["address", "mobile", "profile_pic"]  # Keep customer-related fields for updating
-    profile_pic = forms.ImageField(required=True)
+        profile_pic = forms.ImageField(required=True)
 class ProductForm(forms.ModelForm):
     class Meta:
         model = models.Product
@@ -39,14 +39,13 @@ class ProductForm(forms.ModelForm):
             "unit",
             "expiry_date",
         ]
-    expiry_date = forms.DateField(required=True)
+        expiry_date = forms.DateField(required=True)
 
 # address of shipment
 class AddressForm(forms.Form):
     Email = forms.EmailField()
     Mobile =forms.CharField(min_length=10,max_length=10, required=True)
     Address = forms.CharField(max_length=500)
-
 
 
 

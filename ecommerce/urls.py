@@ -20,6 +20,8 @@ urlpatterns = [
     ),
     path("product-production-list", views.product_production_list_view, name="product-production-list"),
     path("add-product-production", views.add_product_production_view, name="add-product-production"),
+    path('production/edit/<int:production_id>/', views.edit_product_production_view, name='edit-production'),
+    path('production/delete/<int:production_id>/', views.delete_product_production_view, name='delete-production'),
     path("admin-dashboard", views.admin_dashboard_view, name="admin-dashboard"),
     path("view-customer", views.view_customer_view, name="view-customer"),
     
@@ -57,14 +59,5 @@ urlpatterns = [
     ),
     path("customer-address", views.customer_address_view, name="customer-address"),
     path("payment-success", views.payment_success_view, name="payment-success"),
-    path(
-        "cart/increase/<int:product_id>/",
-        views.increase_quantity,
-        name="increase-quantity",
-    ),
-    path(
-        "cart/decrease/<int:product_id>/",
-        views.decrease_quantity,
-        name="decrease-quantity",
-    ),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

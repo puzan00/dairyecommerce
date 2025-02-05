@@ -1,68 +1,89 @@
+    <style>
+        /* Custom CSS for footer */
+        .footer {
+            background-color: #1a1a1a;
+            color: #f8f9fa;
+            padding: 4rem 0 2rem;
+        }
+        .footer h5 {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .footer-content {
+            margin-bottom: 3rem;
+        }
+        .footer ul {
+            padding-left: 0;
+            list-style-type: none;
+        }
+        .footer ul li {
+            margin-bottom: 0.75rem;
+        }
+        .footer a {
+            color: #f8f9fa;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer a:hover {
+            color: #ffffff;
+        }
+        .social-icons {
+            font-size: 1.5rem;
+        }
+        .social-icons a {
+            margin-right: 1rem;
+        }
+        .footer-bottom {
+            border-top: 1px solid #2c2c2c;
+            padding-top: 2rem;
+        }
+        .footer-bottom p, .footer-bottom a {
+            font-size: 0.9rem;
+        }
+    </style>
 
-  <style>
-    /* Custom CSS for consistent footer */
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    
-    main {
-      flex: 1 0 auto;
-    }
-    
-    footer {
-      flex-shrink: 0;
-    }
-    
-    /* Set fixed heights for footer elements */
-    .footer-content {
-      min-height: 200px;
-    }
-    
-    .footer-bottom {
-      min-height: 60px;
-    }
-  </style>
 
-
-  <!-- Footer Section -->
-  <footer class="bg-dark text-light py-4">
+<!-- Footer Section -->
+<footer class="footer">
     <div class="container">
-      <div class="row footer-content">
-        <div class="col-md-4 mb-3 mb-md-0">
-          <h5 class="mb-3">About Hamro Dairy</h5>
-          <p class="small">Hamro Dairy is your one-stop shop for fresh, high-quality dairy products. We're committed to delivering the best to your doorstep.</p>
-        </div>
-        <div class="col-md-4 mb-3 mb-md-0">
-          <h5 class="mb-3">Newsletter</h5>
-          <form>
-            <div class="input-group mb-3">
-              <input type="email" class="form-control" placeholder="Enter your email" aria-label="Enter your email" aria-describedby="button-addon2">
-              <button class="btn btn-outline-light" type="button" id="button-addon2">Subscribe</button>
+        <div class="row footer-content">
+            <div class="col-md-4 mb-4 mb-md-0 ">
+                <h5>About Hamro Dairy</h5>
+                <p class="pe-md-4">Hamro Dairy is your one-stop shop for fresh, high-quality dairy products. We support local farmers and are committed to delivering the best dairy products directly to your doorstep.</p>
             </div>
-          </form>
+            
+            <div class="col-md-4 mb-4 mb-md-0 ">
+                <h5>Popular Products</h5>
+                <ul>
+                    <li><a href="#">Fresh Milk</a></li>
+                    <li><a href="#">Curd</a></li>
+                    <li><a href="#">Cheese</a></li>
+                    <li><a href="#">Butter</a></li>
+                    <li><a href="#">Paneer</a></li>
+                </ul>
+            </div>
+            
+            <div class="col-md-4">
+                <h5>Connect With Us</h5>
+                <div class="social-icons mb-3">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
         </div>
-        <div class="col-md-4">
-          <h5 class="mb-3">Connect With Us</h5>
-          <div class="d-flex justify-content-center justify-content-md-start mb-3">
-            <a href="#" class="text-light me-3" aria-label="Facebook"><i class="fab fa-facebook-f fa-lg"></i></a>
-            <a href="#" class="text-light me-3" aria-label="WhatsApp"><i class="fab fa-whatsapp fa-lg"></i></a>
-            <a href="#" class="text-light me-3" aria-label="Instagram"><i class="fab fa-instagram fa-lg"></i></a>
-            <a href="#" class="text-light" aria-label="Twitter"><i class="fab fa-twitter fa-lg"></i></a>
-          </div>
+        
+        <div class="row footer-bottom">
+            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                <p class="mb-0">&copy; <script>document.write(new Date().getFullYear())</script> Hamro Dairy. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <a href="#" class="me-3">Privacy Policy</a>
+                <a href="#" class="me-3">Terms of Service</a>
+                <span>Developed by Pujan Shrestha</span>
+            </div>
         </div>
-      </div>
-      <hr class="my-4 bg-light">
-      <div class="row footer-bottom d-flex align-items-center">
-        <div class="col-md-6 text-center text-md-start">
-          <p class="small mb-0">&copy; {% now "Y" %} Hamro Dairy. All rights reserved.</p>
-        </div>
-        <div class="col-md-6 text-center text-md-end">
-          <a href="#" class="text-light text-decoration-none small me-3">Privacy Policy</a>
-          <a href="#" class="text-light text-decoration-none small me-3">Terms of Service</a>
-          <span class="small">Developed by Pujan Shrestha</span>
-        </div>
-      </div>
     </div>
-  </footer>
+</footer>
