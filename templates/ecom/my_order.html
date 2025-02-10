@@ -101,115 +101,121 @@
       My Orders / Tracking
     </div>
 
-    {% for order in orders %}
-    <div class="card-body">
-      <div class="row g-3 mb-4">
-        <div class="col-md-4">
-          <div class="itemside mb-3">
-            <div class="aside">
-              <img src="{{ order.product.product_image.url }}" class="img-sm border rounded">
-            </div>
-            <div class="info">
-              <p class="fw-bold mb-1">{{ order.product.name }}</p>
-              <p class="text-muted mb-1">{{ order.product.description }}</p>
-              <p class="mb-0">Price: Rs.{{ order.product.price }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <h6 class="fw-bold">Shipment Address:</h6>
-          <p>{{ order.address }}</p>
-        </div>
-        <div class="col-md-4">
-          <h6 class="fw-bold">Status:</h6>
-          {% if order.status == 'Pending' %}
-          <span class="badge bg-warning text-dark">{{ order.status }}</span>
-          {% elif order.status == 'Delivered' %}
-          <span class="badge bg-success">{{ order.status }}</span>
-          {% elif order.status == 'Out for Delivery' %}
-          <span class="badge bg-info">{{ order.status }}</span>
-          {% else %}
-          <span class="badge bg-primary">{{ order.status }}</span>
-          {% endif %}
-          <div class="mt-3">
-            <a href="{% url 'download-invoice' order.id order.product.id %}" class="btn btn-primary btn-sm">Download Invoice</a>
-          </div>
-        </div>
+    {% if orders|length == 0 %}
+      <div class="card-body text-center">
+        <p>No orders found.</p>
       </div>
+    {% else %}
+      {% for order in orders %}
+      <div class="card-body">
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="itemside mb-3">
+              <div class="aside">
+                <img src="{{ order.product.product_image.url }}" class="img-sm border rounded">
+              </div>
+              <div class="info">
+                <p class="fw-bold mb-1">{{ order.product.name }}</p>
+                <p class="text-muted mb-1">{{ order.product.description }}</p>
+                <p class="mb-0">Price: Rs.{{ order.product.price }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <h6 class="fw-bold">Shipment Address:</h6>
+            <p>{{ order.address }}</p>
+          </div>
+          <div class="col-md-4">
+            <h6 class="fw-bold">Status:</h6>
+            {% if order.status == 'Pending' %}
+            <span class="badge bg-warning text-dark">{{ order.status }}</span>
+            {% elif order.status == 'Delivered' %}
+            <span class="badge bg-success">{{ order.status }}</span>
+            {% elif order.status == 'Out for Delivery' %}
+            <span class="badge bg-info">{{ order.status }}</span>
+            {% else %}
+            <span class="badge bg-primary">{{ order.status }}</span>
+            {% endif %}
+            <div class="mt-3">
+              <a href="{% url 'download-invoice' order.id order.product.id %}" class="btn btn-primary btn-sm">Download Invoice</a>
+            </div>
+          </div>
+        </div>
 
-      <div class="track">
-        {% if order.status == 'Pending' %}
-        <div class="step active">
-          <span class="icon"><i class="fas fa-spinner"></i></span>
-          <span class="text">Order Pending</span>
+        <div class="track">
+          {% if order.status == 'Pending' %}
+          <div class="step active">
+            <span class="icon"><i class="fas fa-spinner"></i></span>
+            <span class="text">Order Pending</span>
+          </div>
+          <div class="step">
+            <span class="icon"><i class="fas fa-check"></i></span>
+            <span class="text">Order Confirmed</span>
+          </div>
+          <div class="step">
+            <span class="icon"><i class="fas fa-truck"></i></span>
+            <span class="text">On the way</span>
+          </div>
+          <div class="step">
+            <span class="icon"><i class="fas fa-home"></i></span>
+            <span class="text">Delivered</span>
+          </div>
+          {% elif order.status == 'Order Confirmed' %}
+          <div class="step active">
+            <span class="icon"><i class="fas fa-spinner"></i></span>
+            <span class="text">Order Pending</span>
+          </div>
+          <div class="step active">
+            <span class="icon"><i class="fas fa-check"></i></span>
+            <span class="text">Order Confirmed</span>
+          </div>
+          <div class="step">
+            <span class="icon"><i class="fas fa-truck"></i></span>
+            <span class="text">On the way</span>
+          </div>
+          <div class="step">
+            <span class="icon"><i class="fas fa-home"></i></span>
+            <span class="text">Delivered</span>
+          </div>
+          {% elif order.status == 'Out for Delivery' %}
+          <div class="step active">
+            <span class="icon"><i class="fas fa-spinner"></i></span>
+            <span class="text">Order Pending</span>
+          </div>
+          <div class="step active">
+            <span class="icon"><i class="fas fa-check"></i></span>
+            <span class="text">Order Confirmed</span>
+          </div>
+          <div class="step active">
+            <span class="icon"><i class="fas fa-truck"></i></span>
+            <span class="text">On the way</span>
+          </div>
+          <div class="step">
+            <span class="icon"><i class="fas fa-home"></i></span>
+            <span class="text">Delivered</span>
+          </div>
+          {% else %}
+          <div class="step active">
+            <span class="icon"><i class="fas fa-spinner"></i></span>
+            <span class="text">Order Pending</span>
+          </div>
+          <div class="step active">
+            <span class="icon"><i class="fas fa-check"></i></span>
+            <span class="text">Order Confirmed</span>
+          </div>
+          <div class="step active">
+            <span class="icon"><i class="fas fa-truck"></i></span>
+            <span class="text">On the way</span>
+          </div>
+          <div class="step active">
+            <span class="icon"><i class="fas fa-home"></i></span>
+            <span class="text">Delivered</span>
+          </div>
+          {% endif %}
         </div>
-        <div class="step">
-          <span class="icon"><i class="fas fa-check"></i></span>
-          <span class="text">Order Confirmed</span>
-        </div>
-        <div class="step">
-          <span class="icon"><i class="fas fa-truck"></i></span>
-          <span class="text">On the way</span>
-        </div>
-        <div class="step">
-          <span class="icon"><i class="fas fa-home"></i></span>
-          <span class="text">Delivered</span>
-        </div>
-        {% elif order.status == 'Order Confirmed' %}
-        <div class="step active">
-          <span class="icon"><i class="fas fa-spinner"></i></span>
-          <span class="text">Order Pending</span>
-        </div>
-        <div class="step active">
-          <span class="icon"><i class="fas fa-check"></i></span>
-          <span class="text">Order Confirmed</span>
-        </div>
-        <div class="step">
-          <span class="icon"><i class="fas fa-truck"></i></span>
-          <span class="text">On the way</span>
-        </div>
-        <div class="step">
-          <span class="icon"><i class="fas fa-home"></i></span>
-          <span class="text">Delivered</span>
-        </div>
-        {% elif order.status == 'Out for Delivery' %}
-        <div class="step active">
-          <span class="icon"><i class="fas fa-spinner"></i></span>
-          <span class="text">Order Pending</span>
-        </div>
-        <div class="step active">
-          <span class="icon"><i class="fas fa-check"></i></span>
-          <span class="text">Order Confirmed</span>
-        </div>
-        <div class="step active">
-          <span class="icon"><i class="fas fa-truck"></i></span>
-          <span class="text">On the way</span>
-        </div>
-        <div class="step">
-          <span class="icon"><i class="fas fa-home"></i></span>
-          <span class="text">Delivered</span>
-        </div>
-        {% else %}
-        <div class="step active">
-          <span class="icon"><i class="fas fa-spinner"></i></span>
-          <span class="text">Order Pending</span>
-        </div>
-        <div class="step active">
-          <span class="icon"><i class="fas fa-check"></i></span>
-          <span class="text">Order Confirmed</span>
-        </div>
-        <div class="step active">
-          <span class="icon"><i class="fas fa-truck"></i></span>
-          <span class="text">On the way</span>
-        </div>
-        <div class="step active">
-          <span class="icon"><i class="fas fa-home"></i></span>
-          <span class="text">Delivered</span>
-        </div>
-        {% endif %}
       </div>
-    </div>
-    {% endfor %}
+      {% endfor %}
+    {% endif %}
   </div>
 </div>
 

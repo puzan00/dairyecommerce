@@ -16,7 +16,7 @@
             <i class="fas fa-plus-circle me-2"></i>Add Production
         </a>
     </div>
-
+    {% if product_productions %}
     <div class="card shadow-sm mb-5">
         <div class="card-body p-0">
             <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
@@ -64,9 +64,12 @@
             </div>
         </div>
     </div>
-
+    {% else %}
+    <div class="alert alert-info text-center" role="alert">
+        No product production records available.
+    </div>
+    {% endif %}
     <!-- Production Summary -->
-  
     <div class="mt-5">
         <h4 class="mb-4">Production Summary by Product</h4>
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">

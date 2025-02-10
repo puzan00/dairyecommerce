@@ -1,66 +1,64 @@
 {% extends 'ecom/admin_base.html' %}
 {% block content %}
 
-<!-- Use Bootstrap 4/5 classes for styling -->
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" class="container mt-5">
   {% csrf_token %}
-  <div class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card shadow">
-          <div class="card-header text-white text-center bg-gradient" style="background: linear-gradient(to left, #2C5364, #203A43, #0F2027);">
-            <h4 class="m-0">ADD PRODUCTS</h4>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <!-- Left Column -->
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="product_name">Product Name</label>
-                  <input type="text" name="name" id="product_name" class="form-control" placeholder="Product Name" required>
-                </div>
-                <div class="form-group">
-                  <label for="description">Short Description</label>
-                  <textarea name="description" id="description" class="form-control" placeholder="Short Description" required></textarea>
-                </div>
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-lg">
+        <div class="card-header text-white text-center bg-gradient"
+             style="background: linear-gradient(to left, #2C5364, #203A43, #0F2027);">
+          <h4 class="m-0">ADD PRODUCTS</h4>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <!-- Left Column -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="product_name" class="form-label">Product Name</label>
+                <input type="text" name="name" id="product_name" class="form-control" placeholder="Product Name" required>
               </div>
-
-              <!-- Right Column -->
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="price">Product Price (Rs.)</label>
-                  <input type="number" name="price" id="price" class="form-control" placeholder="55" step="1" required>
-                </div>
-                <div class="form-group">
-                  <label for="product_image">Product Image</label>
-                  <input type="file" name="product_image" id="product_image" class="form-control" required>
-                </div>
-              </div>
-
-              <!-- Left Column (Quantity & Unit) -->
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="quantity">Quantity</label>
-                  <input type="number" name="quantity" id="quantity" class="form-control" placeholder="Enter quantity" step="1" required>
-                </div>
-                <div class="form-group">
-                  <label for="unit">Product Unit</label>
-                  <input type="text" name="unit" id="unit" class="form-control" placeholder="e.g., kg, liter" required>
-                </div>
-              </div>
-
-              <!-- Right Column (Expiry Date) -->
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="expiry_date">Expiry Date</label>
-                  <input type="date" name="expiry_date" id="expiry_date" class="form-control" required>
-                </div>
+              <div class="mb-3">
+                <label for="description" class="form-label">Short Description</label>
+                <textarea name="description" id="description" class="form-control" placeholder="Short Description" required></textarea>
               </div>
             </div>
 
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-success btn-block">ADD</button>
+            <!-- Right Column -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="price" class="form-label">Product Price (Rs.)</label>
+                <input type="number" name="price" id="price" class="form-control" placeholder="55" step="1" required>
+              </div>
+              <div class="mb-3">
+                <label for="product_image" class="form-label">Product Image</label>
+                <input type="file" name="product_image" id="product_image" class="form-control" required>
+              </div>
+            </div>
+
+            <!-- Left Column (Quantity & Unit) -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity</label>
+                <input type="number" name="quantity" id="quantity" class="form-control" placeholder="Enter quantity" step="1" required>
+              </div>
+              <div class="mb-3">
+                <label for="unit" class="form-label">Product Unit</label>
+                <input type="text" name="unit" id="unit" class="form-control" placeholder="e.g., kg, liter" required>
+              </div>
+            </div>
+
+            <!-- Right Column (Expiry Date) -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="expiry_date" class="form-label">Expiry Date</label>
+                <input type="date" name="expiry_date" id="expiry_date" class="form-control" required>
+              </div>
+            </div>
           </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-success w-100">ADD</button>
         </div>
       </div>
     </div>

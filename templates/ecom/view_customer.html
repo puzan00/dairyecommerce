@@ -22,7 +22,12 @@
       </div>
     </div>
   </div>
-
+  {% if not customers %}
+  <div class="alert alert-info text-center" role="alert">
+    <h3 class="mb-0">No Customers Registered</h3>
+    <p class="mt-2">There are currently no customers in the system.</p>
+  </div>
+{% else %}
   <div class="card app-card shadow-sm mb-4">
     <div class="card-body p-4">
       <div class="table-responsive">
@@ -83,6 +88,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 </div>
 
 <style>

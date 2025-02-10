@@ -65,13 +65,15 @@
 <!-- Products Section -->
 <section class="products-section py-5 bg-light">
   <div class="container">
+    {% if not product %}
+    <div class="alert alert-info text-center" role="alert">
+      <h3 class="mb-0">No Products Found</h3>
+      <p class="mt-2">We're sorry, but there are currently no products available.</p>
+    </div>
+  {% else %}
     <h2 id="featuredProductsTitle" class="text-center mb-4" style="font-size: 2rem; font-weight: 700; color: #4CAF50; text-transform: uppercase;">
         Featured Products
-      </h2>
-    <div id="noProductsFound" class="alert alert-info text-center d-none" role="alert">
-      <h3 class="mb-0">No Products Found</h3>
-      <p class="mt-2">We're sorry, but we couldn't find any products matching your criteria.</p>
-    </div>
+    </h2>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="productContainer">
       {% for p in products %}
       <div class="col mb-4 product-card">
@@ -98,6 +100,7 @@
       </div>
       {% endfor %}
     </div>
+    {% endif %}
   </div>
 </section>
 
@@ -129,7 +132,7 @@
       }
     }
   </script>
-  {% block extra_css %}
+ 
   <style>
     .product-card {
       transition: transform 0.3s ease-in-out;
@@ -162,7 +165,7 @@
     }
   </style>
   
-  {% endblock %}
+
   
 {% endblock content %}
 
