@@ -13,21 +13,21 @@
       </div>
       <div class="carousel-inner">
         <div class="carousel-item active">
-          <img src="{% static 'images/cow.jpg' %}" class="d-block w-100" alt="Slide 1" style="height: 100%; width: 100%; object-fit: cover;">
+          <img src="{% static 'images/cow.jpg' %}" class="d-block w-100" alt="Slide 1"  style="height: 550px; width: 100%; object-fit: cover;">
           <div class="carousel-caption d-none d-md-block">
             <h2>Welcome to Our Store</h2>
             <p>Discover amazing products at great prices!</p>
           </div>
         </div>
         <div class="carousel-item">
-          <img src="{% static 'images/cheese.jpg' %}" class="d-block w-100" alt="Slide 2" style="height: 100%; width: 100%; object-fit: cover;">
+          <img src="{% static 'images/cheese.jpg' %}" class="d-block w-100" alt="Slide 2"  style="height: 550px; width: 100%; object-fit: cover;">
           <div class="carousel-caption d-none d-md-block">
             <h2>New Arrivals</h2>
             <p>Check out our latest collection!</p>
           </div>
         </div>
         <div class="carousel-item">
-          <img src="{% static 'images/milk.jpg' %}" class="d-block w-100" alt="Slide 3" style="height: 100%; width: 100%; object-fit: cover;">
+          <img src="{% static 'images/milk.jpg' %}" class="d-block w-100" alt="Slide 3"  style="height: 550px; width: 100%; object-fit: cover;">
           <div class="carousel-caption d-none d-md-block">
             <h2>Special Offers</h2>
             <p>Don't miss out on our amazing deals!</p>
@@ -65,12 +65,8 @@
 <!-- Products Section -->
 <section class="products-section py-5 bg-light">
   <div class="container">
-    {% if not product %}
-    <div class="alert alert-info text-center" role="alert">
-      <h3 class="mb-0">No Products Found</h3>
-      <p class="mt-2">We're sorry, but there are currently no products available.</p>
-    </div>
-  {% else %}
+   
+
     <h2 id="featuredProductsTitle" class="text-center mb-4" style="font-size: 2rem; font-weight: 700; color: #4CAF50; text-transform: uppercase;">
         Featured Products
     </h2>
@@ -100,7 +96,6 @@
       </div>
       {% endfor %}
     </div>
-    {% endif %}
   </div>
 </section>
 
