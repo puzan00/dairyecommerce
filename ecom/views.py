@@ -1,19 +1,27 @@
-from django.shortcuts import render, redirect, reverse
-from . import forms, models
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
-from django.core.mail import send_mail
-from django.contrib.auth.models import Group
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.conf import settings
-from django.shortcuts import redirect, get_object_or_404
-from django.contrib.auth.models import User
+from django.contrib.auth.forms import AuthenticationForm
 from django.core.mail import send_mail
-from django.contrib.auth import logout
-from .models import Cart, Product, Customer,ProductProduction,Orders
 from django.db import transaction
+from django.db.models import Sum, F
+from django.db.models.functions import TruncWeek
+from datetime import date, timedelta
+from collections import defaultdict
+from .models import Cart, Product, Customer, ProductProduction, Orders
+from django.conf import settings
+from . import forms, models
+from django.utils import timezone
+import io
+from xhtml2pdf import pisa
+from django.template.loader import get_template
+from django.template import Context
+from django.urls import reverse
 
 
+# Home view: Displays the homepage with a list of products.
 def home_view(request):
     products = models.Product.objects.all()
 
@@ -27,12 +35,24 @@ def home_view(request):
         {"products": products},  # Remove product_count_in_cart from context
     )
 
-# # for showing login button for admin(by pujan)
-# def adminclick_view(request):
-#     if request.user.is_authenticated:
-#         return HttpResponseRedirect("afterlogin")
-#     return HttpResponseRedirect("adminlogin")
+# Admin login view: Handles admin login and redirects based on authentication.
+def admin_login_view(request):
+    if request.method == "POST":
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            if user.is_staff:  # Check if user is admin
+                login(request, user)  
+                return redirect("admin-dashboard")  # Redirect to admin dashboard
+            else:
+                messages.error(request, "Access denied. Admins only.")
+                return redirect("adminlogin")  
+    else:
+        form = AuthenticationForm()
 
+    return render(request, "ecom/adminlogin.html", {"form": form})
+
+# Customer signup view: Handles customer signup and validation.
 def customer_signup_view(request):
     # Instantiate the forms
     userForm = forms.CustomerUserForm()
@@ -79,37 +99,21 @@ def customer_signup_view(request):
 def is_customer(user):
     return user.groups.filter(name="CUSTOMER").exists()
 
-
-# ---------AFTER ENTERING CREDENTIALS WE CHECK WHETHER USERNAME AND PASSWORD IS OF ADMIN,CUSTOMER
+# After login: Redirect based on user type (Admin or Customer)
 def afterlogin_view(request):
     if is_customer(request.user):
         return redirect("customer-home")
     else:
         return redirect("admin-dashboard")
 
+# Logout view: Logs the user out and redirects to the login page.
 def logout_view(request):
     logout(request)
     return redirect('customerlogin')
+
 # ---------------------------------------------------------------------------------
 # ------------------------ ADMIN RELATED VIEWS START ------------------------------
 # ---------------------------------------------------------------------------------
-
-from django.shortcuts import render
-from datetime import timedelta, date
-from .models import Customer, Product, Orders
-
-from datetime import date, timedelta
-from django.shortcuts import render
-
-from collections import defaultdict
-from django.db.models import Sum, F
-
-from .models import Orders, Customer, Product, ProductProduction
-from django.db.models.functions import TruncWeek
-
-
-from collections import defaultdict
-from datetime import date, timedelta
 
 def admin_dashboard_view(request):
     # Counts for dashboard cards
@@ -233,15 +237,13 @@ def admin_dashboard_view(request):
 
     return render(request, "ecom/admin_dashboard.html", context)
 
-
-
-
+# Add new product production record view
 def add_product_production_view(request):
-    # Get the list of products
+    # Get the list of products for selection
     products = Product.objects.all()
 
     if request.method == 'POST':
-        # Handle form submission
+        # Handle form submission and create a new production record
         product_id = request.POST.get('product')
         quantity_produced = request.POST.get('quantity_produced')
         production_date = request.POST.get('production_date')
@@ -249,50 +251,56 @@ def add_product_production_view(request):
         # Get the selected product by id
         selected_product = Product.objects.get(id=product_id)
         
-        # Create a new ProductProduction instance
+        # Create and save a new ProductProduction instance
         new_production = ProductProduction(
             product=selected_product,
             quantity_produced=quantity_produced,
             production_date=production_date
         )
-        
-        # Save the new production record
         new_production.save()
         
-        # After saving, redirect to the product production list page
-        return redirect('product-production-list')  # This uses the URL name defined in urls.py
+        # Redirect to the product production list page after saving
+        return redirect('product-production-list')
 
     # Render the form if it's a GET request
     context = {'products': products}
     return render(request, 'ecom/add_product_production.html', context)
 
+# Edit existing product production record view
 def edit_product_production_view(request, production_id):
+    # Get the production record and list of products for selection
     production = ProductProduction.objects.get(id=production_id)
     products = Product.objects.all()
 
     if request.method == 'POST':
+        # Update the production record with form data and save
         production.product_id = request.POST.get('product')
         production.quantity_produced = request.POST.get('quantity_produced')
         production.production_date = request.POST.get('production_date')
         production.save()
         return redirect('product-production-list')
 
+    # Pass production and products to the template
     context = {
         'production': production,
         'products': products,
     }
     return render(request, 'ecom/edit_product_production.html', context)
 
+# Delete product production record view
 def delete_product_production_view(request, production_id):
+    # Get the production record and handle deletion
     production = get_object_or_404(ProductProduction, id=production_id)
 
     if request.method == 'POST':
+        # Delete the production record
         production.delete()
-        return redirect('product-production-list')  # Redirect to the same page to refresh the list
+        return redirect('product-production-list')  # Redirect to refresh the list
 
-    # If method is not POST, render confirmation or the list page directly
+    # If not a POST request, redirect to the list page directly
     return redirect('product-production-list')
 
+# Product production list view: Displays all product production records and totals
 from datetime import date
 
 def product_production_list_view(request):
@@ -303,22 +311,22 @@ def product_production_list_view(request):
     product_totals = {}
     for production in product_productions:
         product = production.product
-        production_date = production.production_date  # Use the date as is
+        production_date = production.production_date  # Use the production date
         quantity_produced = production.quantity_produced
 
-        # Initialize the product entry in the product_totals if not already present
+        # Initialize total quantity if not already present for the product
         if product not in product_totals:
             product_totals[product] = {'total_quantity': 0, 'dates': {}}
         
-        # Add the quantity to the total for that product
+        # Add quantity to the total for that product
         product_totals[product]['total_quantity'] += quantity_produced
 
-        # Add the quantity for a specific date if needed
+        # Track the quantity produced for each specific date
         if production_date not in product_totals[product]['dates']:
             product_totals[product]['dates'][production_date] = 0
         product_totals[product]['dates'][production_date] += quantity_produced
 
-    # Pass product_totals to the template
+    # Pass product production details to the template
     return render(request, "ecom/product_production_list.html", {
         'product_productions': product_productions,
         'product_totals': product_totals,
@@ -353,59 +361,47 @@ def admin_products_view(request):
     }
     
     return render(request, "ecom/admin_products.html", context)
-# admin add product by clicking on floating button
+
 @login_required(login_url="adminlogin")
 def admin_add_product_view(request):
     productForm = forms.ProductForm()
+    
     if request.method == "POST":
         productForm = forms.ProductForm(request.POST, request.FILES)
         if productForm.is_valid():
+            # Save the new product
             productForm.save()
-        return HttpResponseRedirect("admin-products")
+            # Redirect to the admin-products page
+            return HttpResponseRedirect(reverse("admin-products"))  # Use reverse to get URL dynamically
+    
     return render(request, "ecom/admin_add_products.html", {"productForm": productForm})
 
-
-from datetime import date
-
-
-def check_inventory_and_expiry():
-    products = Product.objects.all()
-    low_stock_alerts = []
-    expiry_alerts = []
-    for product in products:
-        if product.quantity < 10:  # Threshold for low stock
-            low_stock_alerts.append(f"{product.name} is low on stock!")
-        if product.expiry_date and (product.expiry_date - date.today()).days <= 7:
-            expiry_alerts.append(f"{product.name} is nearing expiry!")
-    return low_stock_alerts, expiry_alerts
-
-
+# delete product
 @login_required(login_url="adminlogin")
 def delete_product_view(request, pk):
     product = models.Product.objects.get(id=pk)
     product.delete()
     return redirect("admin-products")
 
-
 @login_required(login_url="adminlogin")
 def update_product_view(request, pk):
+    # Get product and initialize form
     product = models.Product.objects.get(id=pk)
     productForm = forms.ProductForm(instance=product)
 
     if request.method == "POST":
+        # Handle form submission and update product
         productForm = forms.ProductForm(request.POST, request.FILES, instance=product)
         if productForm.is_valid():
             productForm.save()
             return redirect("admin-products")
-        else:
-            pass
-    return render(
-        request, "ecom/admin_update_product.html", {"productForm": productForm}
-    )
 
+    # Render form
+    return render(request, "ecom/admin_update_product.html", {"productForm": productForm})
 
 @login_required(login_url="adminlogin")
 def admin_view_booking_view(request):
+    # Fetch orders and associated products/customers
     orders = models.Orders.objects.all().order_by('-order_date')
     ordered_products = []
     ordered_bys = []
@@ -414,33 +410,33 @@ def admin_view_booking_view(request):
         ordered_by = models.Customer.objects.all().filter(id=order.customer.id)
         ordered_products.append(ordered_product)
         ordered_bys.append(ordered_by)
-    return render(
-        request,
-        "ecom/admin_view_booking.html",
-        {"data": zip(ordered_products, ordered_bys, orders)},
-    )
 
+    # Render booking page
+    return render(request, "ecom/admin_view_booking.html", {"data": zip(ordered_products, ordered_bys, orders)})
 
 @login_required(login_url="adminlogin")
 def delete_order_view(request, pk):
+    # Delete order
     order = models.Orders.objects.get(id=pk)
     order.delete()
     return redirect("admin-view-booking")
 
 
-# for changing status of order (pending,delivered...)
 @login_required(login_url="adminlogin")
 def update_order_view(request, pk):
+    # Get order and initialize form
     order = models.Orders.objects.get(id=pk)
     orderForm = forms.OrderForm(instance=order)
+
     if request.method == "POST":
+        # Handle form submission and update order status
         orderForm = forms.OrderForm(request.POST, instance=order)
         if orderForm.is_valid():
             orderForm.save()
             return redirect("admin-view-booking")
+
+    # Render form
     return render(request, "ecom/update_order.html", {"orderForm": orderForm})
-
-
 
 
 
@@ -449,34 +445,28 @@ def update_order_view(request, pk):
 # ---------------------------------------------------------------------------------from django.shortcuts import redirect, get_object_or_404, render
 
 
-
 def add_to_cart(request, product_id):
+    # Ensure user is authenticated
     if not request.user.is_authenticated:
         return redirect("customerlogin")
 
+    # Get the product and customer from the database
     product = get_object_or_404(Product, id=product_id)
     customer = get_object_or_404(Customer, user=request.user)
 
-    # Check if the product is already in the cart of any customer
+    # Check if the product is already in the cart
     existing_cart_item = Cart.objects.filter(product=product).first()
 
     if existing_cart_item:
-        # If the product is already in another cart, it's out of stock for the current user
-        messages.error(request, f"{product.name} is already in another cart and is out of stock!")
-        return redirect("customer-home")
+        return redirect("cart")
     
-    # Add product to cart (1 quantity)
     Cart.objects.create(customer=customer, product=product, quantity=1)
-    
-    # Now the product is effectively out of stock for others, no need to track its quantity in the model.
-    messages.success(request, f"{product.name} has been added to your cart.")
 
     return redirect("cart")
 
 
-# In views.py
 
-# Updated cart view with stock validation
+# cart view with stock validation
 def cart_view(request):
     if not request.user.is_authenticated:
         return redirect("customerlogin")
@@ -491,9 +481,6 @@ def cart_view(request):
             item.save()
             if item.product.quantity == 0:
                 item.delete()
-                messages.warning(request, f"{item.product.name} has been removed from cart (Out of Stock)")
-            else:
-                messages.warning(request, f"Quantity adjusted for {item.product.name} due to stock availability")
 
     # Recalculate total after any adjustments
     total = sum(item.product.price * item.quantity for item in cart_items)
@@ -505,30 +492,24 @@ def cart_view(request):
         "product_count_in_cart": product_count_in_cart,
     })
 
+
 def remove_from_cart_view(request, pk):
+    # Remove item from the cart for authenticated user
     if not request.user.is_authenticated:
-        return redirect("customerlogin")  # Redirect to login page if not authenticated
+        return redirect("customerlogin")
 
     # Get the cart item to be removed
-    cart_item = get_object_or_404(Cart, id=pk)  # Use 'pk' here, not 'cart_item_id'
+    cart_item = get_object_or_404(Cart, id=pk)
 
     # Ensure that the cart item belongs to the logged-in user
     if cart_item.customer.user != request.user:
         return redirect("cart")  # Prevent unauthorized removal
 
-    # Delete the cart item
+ 
     cart_item.delete()
 
-    # Redirect to the cart view after removal
     return redirect("cart")
 
-
-
-
-# ---------------------------------------------------------------------------------
-# ------------------------ CUSTOMER RELATED VIEWS START ------------------------------
-# ---------------------------------------------------------------------------------
-from django.utils import timezone
 
 @login_required(login_url="customerlogin")
 @user_passes_test(is_customer)
@@ -566,9 +547,9 @@ def customer_home_view(request):
             "product_count_in_cart": product_count_in_cart,
         }
     )
+    
+    
 # shipment address before placing order
-
-
 @login_required(login_url="customerlogin")
 def customer_address_view(request):
     customer = get_object_or_404(models.Customer, user=request.user)
@@ -609,11 +590,8 @@ def customer_address_view(request):
     )
 
 
-# here we are just directing to this view...actually we have to check whther payment is successful or not
-# then only this view should be accessed
 
-
-# Updated payment success view with better stock management
+#  payment success view 
 @login_required(login_url="customerlogin")
 def payment_success_view(request):
     customer = get_object_or_404(models.Customer, user=request.user)
@@ -658,38 +636,77 @@ def payment_success_view(request):
 
     return render(request, "ecom/payment_success.html", {"orders": orders})
 
+
 @login_required(login_url="customerlogin")
 @user_passes_test(is_customer)
 def my_order_view(request):
+    # View to display the orders of the logged-in customer
     customer = models.Customer.objects.get(user_id=request.user.id)
     orders = models.Orders.objects.filter(customer=customer).select_related('product')  # Optimized query
     
     return render(
         request,
         "ecom/my_order.html",
-        {"orders": orders}  # Pass the orders queryset directly to the template
+        {"orders": orders}  
     )
 
+@login_required(login_url="customerlogin")
+@user_passes_test(is_customer)
+def my_profile_view(request):
+    try:
+        # Attempt to get the customer associated with the logged-in user
+        customer = models.Customer.objects.get(user_id=request.user.id)
+    except models.Customer.DoesNotExist:
+        # If no customer is found, raise an error or redirect to another page
+        raise Http404("Customer not found")
+
+    # Return the profile page with the customer object
+    return render(request, "ecom/my_profile.html", {"customer": customer})
 
 
+@login_required(login_url='customerlogin')
+def edit_profile_view(request):
+    customer = get_object_or_404(models.Customer, user=request.user)
+    user = request.user  # Directly use the authenticated user
 
+    if request.method == "POST":
+        # Use the new forms: EditProfileForm (without password) and EditCustomerForm
+        userForm = forms.EditProfileForm(request.POST, instance=user)  # Without password field
+        customerForm = forms.EditCustomerForm(request.POST, request.FILES, instance=customer)
 
-# --------------for discharge customer bill (pdf) download and printing
-import io
-from xhtml2pdf import pisa
-from django.template.loader import get_template
-from django.template import Context
-from django.http import HttpResponse
+        if userForm.is_valid() and customerForm.is_valid():
+            userForm.save()  # Save user details (excluding password)
+            customerForm.save()  # Save customer details
 
+            # Log to verify the redirect URL
+            next_url = request.GET.get('next', 'my-profile')  # Get 'next' or fallback to 'my-profile'
+            return redirect(next_url)  # Redirect to 'next' or fallback
 
+    else:
+        # Prefill the forms with the current user and customer data
+        userForm = forms.EditProfileForm(instance=user)  # Without password field
+        customerForm = forms.EditCustomerForm(instance=customer)
+
+    return render(request, "ecom/edit_profile.html", {"userForm": userForm, "customerForm": customerForm})
+
+# --------------for discharge customer bill (pdf) download and printing----------------
 def render_to_pdf(template_src, context_dict):
-    template = get_template(template_src)
-    html = template.render(context_dict)
-    result = io.BytesIO()
-    pdf = pisa.pisaDocument(io.BytesIO(html.encode("ISO-8859-1")), result)
-    if not pdf.err:
-        return HttpResponse(result.getvalue(), content_type="application/pdf")
-    return
+    try:
+        template = get_template(template_src)
+        html = template.render(context_dict)
+        result = io.BytesIO()
+        pdf = pisa.pisaDocument(io.BytesIO(html.encode("utf-8")), result)  # Consider utf-8 for broader character support
+
+        if not pdf.err:
+            return HttpResponse(result.getvalue(), content_type="application/pdf")
+        else:
+            # Optionally handle the error by logging or returning an appropriate message
+            return HttpResponse("Error generating PDF", status=400)
+
+    except Exception as e:
+        # Handle unexpected errors
+        return HttpResponse(f"An error occurred: {str(e)}", status=500)
+
 
 
 @login_required(login_url="customerlogin")
@@ -711,47 +728,7 @@ def download_invoice_view(request, orderID, productID):
     return render_to_pdf("ecom/download_invoice.html", mydict)
 
 
-@login_required(login_url="customerlogin")
-@user_passes_test(is_customer)
-def my_profile_view(request):
-    try:
-        # Attempt to get the customer associated with the logged-in user
-        customer = models.Customer.objects.get(user_id=request.user.id)
-    except models.Customer.DoesNotExist:
-        # If no customer is found, raise an error or redirect to another page
-        raise Http404("Customer not found")
-
-    # Return the profile page with the customer object
-    return render(request, "ecom/my_profile.html", {"customer": customer})
-@login_required(login_url='customerlogin')
-def edit_profile_view(request):
-    customer = get_object_or_404(models.Customer, user=request.user)
-    user = request.user  # Directly use the authenticated user
-
-    if request.method == "POST":
-        # Use the new forms: EditProfileForm (without password) and EditCustomerForm
-        userForm = forms.EditProfileForm(request.POST, instance=user)  # Without password field
-        customerForm = forms.EditCustomerForm(request.POST, request.FILES, instance=customer)
-
-        if userForm.is_valid() and customerForm.is_valid():
-            userForm.save()  # Save user details (excluding password)
-            customerForm.save()  # Save customer details
-
-            # Log to verify the redirect URL
-            next_url = request.GET.get('next', 'my-profile')  # Get 'next' or fallback to 'my-profile'
-            print(f"Redirecting to: {next_url}")
-            return redirect(next_url)  # Redirect to 'next' or fallback
-
-    else:
-        # Prefill the forms with the current user and customer data
-        userForm = forms.EditProfileForm(instance=user)  # Without password field
-        customerForm = forms.EditCustomerForm(instance=customer)
-
-    return render(request, "ecom/edit_profile.html", {"userForm": userForm, "customerForm": customerForm})
-# ---------------------------------------------------------------------------------
-# ------------------------ ABOUT US AND CONTACT US VIEWS START --------------------
-# ---------------------------------------------------------------------------------
-
-
+#Contactus & About us
 def contactus_view(request):
     return render(request, "ecom/contactus.html")
+

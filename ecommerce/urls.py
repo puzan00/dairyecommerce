@@ -4,6 +4,7 @@ from ecom import views
 from django.contrib.auth.views import LoginView
 from django.conf import settings
 from django.conf.urls.static import static
+from ecom.views import admin_login_view 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -12,11 +13,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path("contactus/", views.contactus_view, name="contactus"),  # Added slash here
     
-    path(
-        "adminlogin/",  
-        LoginView.as_view(template_name="ecom/adminlogin.html"),
-        name="adminlogin",
-    ),
+    path("adminlogin/", admin_login_view, name="adminlogin"),
     path("product-production-list/", views.product_production_list_view, name="product-production-list"),  # Added slash
     path("add-product-production/", views.add_product_production_view, name="add-product-production"),  # Added slash
     path('production/edit/<int:production_id>/', views.edit_product_production_view, name='edit-production'),
@@ -33,14 +30,14 @@ urlpatterns = [
     ),  # Added slash
     path("delete-order/<int:pk>/", views.delete_order_view, name="delete-order"),  # Added slash
     path("update-order/<int:pk>/", views.update_order_view, name="update-order"),  # Added slash
-    path("customersignup/", views.customer_signup_view),  # Added slash
+    path("customersignup/", views.customer_signup_view, name="customersignup"),  # Added slash
     path(
         "customerlogin/",  # Already with slash
         LoginView.as_view(template_name="ecom/customerlogin.html"),
         name="customerlogin",
     ),
     path("customer-home/", views.customer_home_view, name="customer-home"),  # Added slash
-    path("my-order/", views.my_order_view, name="my-order"),  # Added slash
+    path("my-order/", views.my_order_view, name="my-order"), 
     path("my-profile/", views.my_profile_view, name="my-profile"),  # Added slash
     path("edit-profile/", views.edit_profile_view, name="edit-profile"),  # Added slash
     path(
