@@ -51,13 +51,7 @@
                 {% endif %}
               </div>
               
-              <!-- Remember me checkbox -->
-              <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="rememberMe">
-                <label class="form-check-label" for="rememberMe">
-                  Remember me
-                </label>
-              </div>
+           
               
               <!-- Submit button -->
               <div class="d-grid mb-4">
@@ -111,38 +105,4 @@
   }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Get form elements
-    const usernameInput = document.getElementById('floatingUsername');
-    const rememberMeCheckbox = document.getElementById('rememberMe');
-    const loginForm = document.getElementById('loginForm');
-
-    // Check if there's a saved username in localStorage
-    const savedUsername = localStorage.getItem('rememberedUsername');
-    if (savedUsername) {
-        usernameInput.value = savedUsername;
-        rememberMeCheckbox.checked = true;
-    }
-
-    // Add form submit event listener
-    loginForm.addEventListener('submit', function() {
-        if (rememberMeCheckbox.checked) {
-            // Save username if "Remember me" is checked
-            localStorage.setItem('rememberedUsername', usernameInput.value);
-        } else {
-            // Remove saved username if "Remember me" is unchecked
-            localStorage.removeItem('rememberedUsername');
-        }
-    });
-
-    // Add change event listener to checkbox
-    rememberMeCheckbox.addEventListener('change', function() {
-        if (!this.checked) {
-            // Remove saved username when unchecking "Remember me"
-            localStorage.removeItem('rememberedUsername');
-        }
-    });
-});
-</script>
 {% endblock %}
