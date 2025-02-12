@@ -29,13 +29,14 @@
       <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
         {% if products %}
         <table class="table table-hover mb-0" id="productsTable">
-          <thead class="table-dark"> <!-- Added Bootstrap class 'table-dark' for black background and white text -->
+          <thead class="table-dark">
             <tr>
               <th>SN</th>
               <th>Product</th>
               <th>Product ID</th>
               <th>Price</th>
               <th>Quantity</th>
+              <th>Production Date</th>
               <th id="sortExpiry" style="cursor: pointer;">Expiry Date <i class="fas fa-sort"></i></th>
               <th>Actions</th>
             </tr>
@@ -63,6 +64,7 @@
               <td>{{ p.id }}</td>
               <td>Rs. {{ p.price }}</td>
               <td>{{ p.quantity }} {{ p.unit }}</td>
+              <td class="production-date" data-date="{{ p.date_added }}">{{ p.date_added }}</td>
               <td class="expiry-date" data-date="{{ p.expiry_date }}">{{ p.expiry_date }}</td>
               <td>
                 <div class="btn-group" role="group">
@@ -95,7 +97,6 @@
 </div>
 
 <style>
-  
   .product-img,
   .product-img-placeholder {
     width: 50px;
@@ -129,7 +130,6 @@
     }
   }
 
-  /* New CSS for fixed table header */
   .table-responsive {
     position: relative;
     overflow-y: auto;
@@ -139,8 +139,8 @@
   .table thead th {
     position: sticky;
     top: 0;
-    background-color: #343a40; /* Black background for header */
-    color: white; /* White text */
+    background-color: #343a40;
+    color: white;
     z-index: 2;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
@@ -156,9 +156,8 @@
   
       for (var i = 1; i < rows.length; i++) {
         var productName = rows[i].querySelector('td:nth-child(2)').textContent.toLowerCase();
-        var productId = rows[i].querySelector('td:nth-child(3)').textContent.toLowerCase(); // Search by Product ID
+        var productId = rows[i].querySelector('td:nth-child(3)').textContent.toLowerCase();
   
-        // Check if input matches either the product name or product ID
         if (productName.indexOf(input) > -1 || productId.indexOf(input) > -1) {
           rows[i].style.display = '';
         } else {
@@ -167,33 +166,35 @@
       }
     });
   
-    // Format expiry date
-    var dateCells = document.querySelectorAll('.expiry-date');
-    dateCells.forEach(function(cell) {
-      var originalDate = new Date(cell.getAttribute('data-date'));
-      var formattedDate = formatDate(originalDate);
-      cell.textContent = formattedDate; // Update the table with formatted date
-    });
+    // Format both production and expiry dates
+    function formatDates(selector) {
+      var dateCells = document.querySelectorAll(selector);
+      dateCells.forEach(function(cell) {
+        var originalDate = new Date(cell.getAttribute('data-date'));
+        var formattedDate = formatDate(originalDate);
+        cell.textContent = formattedDate;
+      });
+    }
 
-    // Sort the products by expiry date in ascending order as soon as the page loads
+    formatDates('.production-date');
+    formatDates('.expiry-date');
+
+    // Sort the products by expiry date
     var table = document.getElementById('productsTable');
     var rows = Array.from(table.querySelectorAll('tbody tr'));
 
     rows.sort(function(a, b) {
       var dateA = new Date(a.querySelector('.expiry-date').getAttribute('data-date'));
       var dateB = new Date(b.querySelector('.expiry-date').getAttribute('data-date'));
-      return dateA - dateB; // Ascending order (earliest expiry first)
+      return dateA - dateB;
     });
 
-    // Reattach the sorted rows to the table
     rows.forEach(function(row, index) {
-      // Update the serial number dynamically
       row.querySelector('td:nth-child(1)').textContent = index + 1;
       table.querySelector('tbody').appendChild(row);
     });
   });
   
-  // Function to format date into "Month Day, Year" format
   function formatDate(date) {
     var options = { year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);

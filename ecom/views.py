@@ -27,11 +27,12 @@ def home_view(request):
         {"products": products},  # Remove product_count_in_cart from context
     )
 
-# for showing login button for admin(by pujan)
-def adminclick_view(request):
-    if request.user.is_authenticated:
-        return HttpResponseRedirect("afterlogin")
-    return HttpResponseRedirect("adminlogin")
+# # for showing login button for admin(by pujan)
+# def adminclick_view(request):
+#     if request.user.is_authenticated:
+#         return HttpResponseRedirect("afterlogin")
+#     return HttpResponseRedirect("adminlogin")
+
 def customer_signup_view(request):
     # Instantiate the forms
     userForm = forms.CustomerUserForm()
@@ -337,10 +338,21 @@ def view_customer_view(request):
 # admin view the product
 @login_required(login_url="adminlogin")
 def admin_products_view(request):
-    products = models.Product.objects.all()
-    return render(request, "ecom/admin_products.html", {"products": products})
+    # Get all products ordered by production date (newest first)
+    products = models.Product.objects.all().order_by('-date_added')
+    
+    # Format the production date for each product
+    for product in products:
+        product.formatted_date_added = product.date_added.strftime("%Y-%m-%d") if product.date_added else None
 
 
+    
+    context = {
+        "products": products,
+        "total_products": len(products),
+    }
+    
+    return render(request, "ecom/admin_products.html", context)
 # admin add product by clicking on floating button
 @login_required(login_url="adminlogin")
 def admin_add_product_view(request):

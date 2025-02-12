@@ -72,7 +72,7 @@
     <!-- Production Summary -->
     <div class="mt-5">
         <h4 class="mb-4">Production Summary by Product</h4>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="productionSummary">
             {% for product, totals in product_totals.items %}
                 <div class="col">
                     <div class="card shadow-sm h-100">
@@ -119,7 +119,6 @@
             {% endfor %}
         </div>
     </div>
-
 </div>
 
 <script>
@@ -140,7 +139,22 @@
             var date = new Date(cell.getAttribute('data-date'));
             cell.textContent = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         });
+
+        adjustProductionSummaryLayout();
     };
+
+    function adjustProductionSummaryLayout() {
+        var summaryContainer = document.getElementById('productionSummary');
+        var productCount = summaryContainer.children.length;
+
+        if (productCount > 4) {
+            summaryContainer.classList.remove('row-cols-xl-4');
+            summaryContainer.classList.add('row-cols-xl-3');
+        } else {
+            summaryContainer.classList.remove('row-cols-xl-3');
+            summaryContainer.classList.add('row-cols-xl-4');
+        }
+    }
 
     // JavaScript function to confirm deletion
     function confirmDelete() {
@@ -148,3 +162,4 @@
     }
 </script>
 {% endblock %}
+

@@ -12,7 +12,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path("contactus/", views.contactus_view, name="contactus"),  # Added slash here
     
-    # path("adminclick/", views.adminclick_view),  # Added slash here
     path(
         "adminlogin/",  
         LoginView.as_view(template_name="ecom/adminlogin.html"),
