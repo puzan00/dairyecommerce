@@ -21,20 +21,24 @@
 
     <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
       <div class="navbar-nav">
-        <a href="{% url 'view-customer' %}" class="nav-item nav-link">
-          <i class="fas fa-users me-1"></i> Customers
-        </a>
-        <a href="{% url 'admin-view-booking' %}" class="nav-item nav-link">
-          <i class="fas fa-shopping-cart me-1"></i> Orders
-        </a>
-        <a href="{% url 'admin-products' %}" class="nav-item nav-link">
-          <i class="fas fa-box me-1"></i> Products
-        </a>
-        <a href="{% url 'product-production-list' %}" class="nav-item nav-link">
+        <a href="{% url 'product-production-list' %}" class="nav-item nav-link ms-2">
           <i class="fas fa-cogs me-1"></i> Production
         </a>
 
-        <a href="{% url 'expiry-alerts' %}" class="nav-item nav-link position-relative" id="expiryAlertLink">
+        <a href="{% url 'admin-products' %}" class="nav-item nav-link ms-2">
+          <i class="fas fa-box me-1"></i> Products
+        </a>
+        
+        <a href="{% url 'admin-view-booking' %}" class="nav-item nav-link ms-2">
+          <i class="fas fa-shopping-cart me-1"></i> Orders
+        </a>
+
+        <a href="{% url 'view-customer' %}" class="nav-item nav-link ms-2">
+          <i class="fas fa-users me-1"></i> Customers
+        </a>
+        
+       
+        <a href="{% url 'expiry-alerts' %}" class="nav-item nav-link position-relative ms-2" id="expiryAlertLink">
           <i class="fas fa-bell"></i> Expiry Alerts
           {% with expired_count=request.session.expired_count|default:0 %}
           {% with near_expiry_count=request.session.near_expiry_count|default:0 %}

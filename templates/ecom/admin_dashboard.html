@@ -83,14 +83,14 @@
                   <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>
-                      <div class="fw-bold">{{ order.customer.get_name }}</div>
+                      <div class="fw-bold">{{ order.customer.get_name|capfirst }}</div>
                       <div class="text-muted small">{{ order.address|truncatechars:20 }}</div>
                     </td>
                     <td>{{ order.customer.mobile }}</td>
                     <td>
                       <div class="d-flex align-items-center">
                         <img src="{{ order.product.product_image.url }}" class="rounded" width="40" height="40" alt="Product">
-                        <div>{{ order.product.name }}</div>
+                        <div>{{ order.product.name|capfirst }}</div>
                       </div>
                     </td>
                     <td>{{ order.product.quantity }} {{ order.product.unit }}</td>
@@ -161,7 +161,7 @@
                     <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="img-fluid me-2" style="width: 60px; height: 60px;">
                     <div>
                       <i class="fas fa-clock me-2"></i>
-                      {{ product.name }} (ID: {{ product.id }})
+                      {{ product.name|capfirst }} (ID: {{ product.id }})
                     </div>
                   </div>
                   <span class="badge bg-warning text-dark">

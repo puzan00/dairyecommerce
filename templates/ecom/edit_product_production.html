@@ -11,23 +11,30 @@
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
-                        
+
+                        <!-- Editable Product Name -->
                         <div class="mb-3">
-                            <p class="form-control-plaintext">Product: {{ production.product.name }}</p>
+                            <label for="product_name" class="form-label">Product Name:</label>
+                            <input type="text" name="product_name" id="product_name" class="form-control form-control-sm" 
+                                   value="{{ production.product_name }}" required>
                         </div>
-                        
+
+
+                        <!-- Quantity Produced Input -->
                         <div class="mb-3">
                             <label for="quantity_produced" class="form-label">Quantity Produced:</label>
                             <input type="number" name="quantity_produced" id="quantity_produced" class="form-control form-control-sm" 
                                    value="{{ production.quantity_produced }}" required>
                         </div>
-                        
+
+                        <!-- Production Date Input -->
                         <div class="mb-4">
                             <label for="production_date" class="form-label">Production Date:</label>
                             <input type="date" name="production_date" id="production_date" class="form-control form-control-sm" 
                                    value="{{ production.production_date|date:'Y-m-d' }}" required>
                         </div>
-                        
+
+                        <!-- Buttons -->
                         <div class="d-flex">
                             <button type="submit" class="btn btn-success me-3">
                                 <i class="fas fa-edit me-2"></i>Update Production

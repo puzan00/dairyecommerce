@@ -159,13 +159,13 @@ def admin_dashboard_view(request):
         "Delivered": orders.filter(status="Delivered").count(),
     }
 
-    # Product production data for the chart
+     # Product production data for the chart
     product_productions = ProductProduction.objects.all()
     production_data = defaultdict(list)
 
     for production in product_productions:
         production_data[production.production_date].append({
-            'product_name': production.product.name,
+            'product_name': production.product_name.capitalize(),  # Convert product name to uppercase
             'quantity_produced': production.quantity_produced,
         })
 
@@ -238,59 +238,57 @@ def admin_dashboard_view(request):
 
 # Add new product production record view
 def add_product_production_view(request):
-    # Get the list of products for selection
-    products = Product.objects.all()
-
     if request.method == 'POST':
         # Handle form submission and create a new production record
-        product_id = request.POST.get('product')
+        product_name = request.POST.get('product_name').strip().lower()  # Ensure product name is in lowercase
+        product_unit = request.POST.get('product_unit').strip().lower()  # Ensure unit is in lowercase
         quantity_produced = request.POST.get('quantity_produced')
         production_date = request.POST.get('production_date')
-        
-        # Get the selected product by id
-        selected_product = Product.objects.get(id=product_id)
-        
+
         # Create and save a new ProductProduction instance
         new_production = ProductProduction(
-            product=selected_product,
+            product_name=product_name,
+            product_unit=product_unit,
             quantity_produced=quantity_produced,
             production_date=production_date
         )
         new_production.save()
-        
+
         # Redirect to the product production list page after saving
         return redirect('product-production-list')
 
-    # Render the form if it's a GET request
-    context = {'products': products}
+    # Pass today's date to the template for max date validation
+    context = {'today': now().date()}
     return render(request, 'ecom/add_product_production.html', context)
 
 # Edit existing product production record view
 def edit_product_production_view(request, production_id):
-    # Get the production record and list of products for selection
-    production = ProductProduction.objects.get(id=production_id)
-    products = Product.objects.all()
+    # Get the production record
+    production = get_object_or_404(ProductProduction, id=production_id)
 
     if request.method == 'POST':
-        # Update the production record with form data and save
-        production.product_id = request.POST.get('product')
-        production.quantity_produced = request.POST.get('quantity_produced')
-        production.production_date = request.POST.get('production_date')
+        # Get form data and update the production record
+        product_name = request.POST.get('product_name').strip().lower()  # Standardize product name to lowercase
+        quantity_produced = request.POST.get('quantity_produced')
+        production_date = request.POST.get('production_date')
+
+        # Update production record with the new data
+        production.product_name = product_name
+        production.quantity_produced = quantity_produced
+        production.production_date = production_date
         production.save()
+
         return redirect('product-production-list')
 
-    # Pass production and products to the template
+    # Pass production to the template
     context = {
         'production': production,
-        'products': products,
     }
     return render(request, 'ecom/edit_product_production.html', context)
-
 # Delete product production record view
 def delete_product_production_view(request, production_id):
     # Get the production record and handle deletion
     production = get_object_or_404(ProductProduction, id=production_id)
-
     if request.method == 'POST':
         # Delete the production record
         production.delete()
@@ -309,29 +307,32 @@ def product_production_list_view(request):
     # Calculate total quantity produced for each product by date
     product_totals = {}
     for production in product_productions:
-        product = production.product
-        production_date = production.production_date  # Use the production date
+        product_name = production.product_name.upper()
+        product_unit = production.product_unit
+        production_date = production.production_date
         quantity_produced = production.quantity_produced
 
         # Initialize total quantity if not already present for the product
-        if product not in product_totals:
-            product_totals[product] = {'total_quantity': 0, 'dates': {}}
-        
+        if product_name not in product_totals:
+            product_totals[product_name] = {
+                'total_quantity': 0,
+                'product_unit': product_unit,  # Store the unit for consistency
+                'dates': {}
+            }
+
         # Add quantity to the total for that product
-        product_totals[product]['total_quantity'] += quantity_produced
+        product_totals[product_name]['total_quantity'] += quantity_produced
 
         # Track the quantity produced for each specific date
-        if production_date not in product_totals[product]['dates']:
-            product_totals[product]['dates'][production_date] = 0
-        product_totals[product]['dates'][production_date] += quantity_produced
+        if production_date not in product_totals[product_name]['dates']:
+            product_totals[product_name]['dates'][production_date] = 0
+        product_totals[product_name]['dates'][production_date] += quantity_produced
 
     # Pass product production details to the template
     return render(request, "ecom/product_production_list.html", {
         'product_productions': product_productions,
         'product_totals': product_totals,
     })
-
-
 
 # admin view customer table
 @login_required(login_url="adminlogin")
@@ -368,8 +369,14 @@ def admin_add_product_view(request):
     if request.method == "POST":
         productForm = forms.ProductForm(request.POST, request.FILES)
         if productForm.is_valid():
+            # Get the cleaned data from the form
+            product = productForm.save(commit=False)
+            
+            # Strip spaces and convert product name to lowercase
+            product.product_name = product.name.strip().lower()
+            
             # Save the new product
-            product = productForm.save()
+            product.save()
             
             # Update notification counts
             today = now().date()
@@ -390,6 +397,7 @@ def admin_add_product_view(request):
             return HttpResponseRedirect(reverse("admin-products"))
     
     return render(request, "ecom/admin_add_products.html", {"productForm": productForm})
+
 
 # delete product
 @login_required(login_url="adminlogin")
@@ -415,7 +423,14 @@ def update_product_view(request, pk):
     if request.method == "POST":
         productForm = forms.ProductForm(request.POST, request.FILES, instance=product)
         if productForm.is_valid():
-            productForm.save()
+            # Get the cleaned data from the form before saving
+            product = productForm.save(commit=False)
+            
+            # Strip spaces and convert product name to lowercase
+            product.product_name = product.name.strip().lower()
+            
+            # Save the updated product
+            product.save()
             
             # Update notification counts
             today = now().date()

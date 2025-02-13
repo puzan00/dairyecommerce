@@ -1,5 +1,4 @@
 {% extends 'ecom/admin_base.html' %}
-
 {% block content %}
 <div class="container-fluid mt-4">
     <div class="row justify-content-center">
@@ -12,34 +11,42 @@
                     <form method="POST" action="{% url 'add-product-production' %}">
                         {% csrf_token %}
                         
+                        <!-- Product Name -->
                         <div class="mb-3">
-                            <label for="product" class="form-label">Select Product</label>
-                            <select class="form-select" name="product" id="product" required>
-                                {% for product in products %}
-                                    <option value="{{ product.id }}" {% if product.id == selected_product.id %}selected{% endif %}>{{ product.name }}</option>
-                                {% endfor %}
+                            <label for="product_name" class="form-label">Product Name</label>
+                            <input type="text" class="form-control" id="product_name" name="product_name" placeholder="e.g., Milk" required>
+                        </div>
+
+                        <!-- Product Unit Dropdown -->
+                        <div class="mb-3">
+                            <label for="product_unit" class="form-label">Product Unit</label>
+                            <select class="form-select" id="product_unit" name="product_unit" required>
+                                <option value="litre" selected>litre</option>
+                                <option value="kg">kg</option> 
                             </select>
                         </div>
                         
+                        <!-- Quantity Produced -->
                         <div class="mb-3">
                             <label for="quantity_produced" class="form-label">Quantity Produced</label>
-                            <input type="number" step="0.01" class="form-control" id="quantity_produced" name="quantity_produced" required>
+                            <input type="number" step="0.01" class="form-control" id="quantity_produced" name="quantity_produced" placeholder="e.g., 100.50" required>
                         </div>
                         
+                        <!-- Production Date -->
                         <div class="mb-3">
                             <label for="production_date" class="form-label">Date of Production</label>
-                            <input type="date" class="form-control" id="production_date" name="production_date" required>
+                            <input type="date" class="form-control" id="production_date" name="production_date" max="{{ today|date:'Y-m-d' }}" required>
                         </div>
                         
-                        <div class="d-flex ">
-                            <button type="submit" class="btn btn-success me-3">
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success">
                                 <i class="fas fa-plus-circle me-2"></i>Add Production
                             </button>
                             <a href="{% url 'product-production-list' %}" class="btn btn-danger">
                                 <i class="fas fa-times-circle me-2"></i>Cancel
                             </a>
                         </div>
-                        
                     </form>
                 </div>
             </div>

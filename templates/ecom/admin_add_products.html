@@ -45,7 +45,10 @@
                           </div>
                           <div class="mb-3">
                               <label for="unit" class="form-label">Product Unit</label>
-                              <input type="text" name="unit" id="unit" class="form-control" placeholder="e.g., kg, liter" required>
+                              <select name="unit" id="unit" class="form-control" required>
+                                  <option value="kg">kg</option>
+                                  <option value="litre">litre</option>
+                              </select>
                           </div>
                       </div>
 
@@ -67,12 +70,9 @@
                           <i class="fas fa-times-circle me-2"></i> Cancel
                       </a>
                   </div>
-                  
               </div>
           </div>
       </div>
   </div>
 </form>
-
-
 {% endblock content %}

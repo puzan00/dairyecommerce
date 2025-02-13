@@ -34,7 +34,7 @@
                                     {% for product in expired_products %}
                                     <tr>
                                         <td>{{ product.id }}</td>
-                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.name|capfirst }}</td>
                                         <td>{{ product.quantity }} {{ product.unit }}</td>
                                         <td>{{ product.expiry_date }}</td>
                                         <td class="text-danger fw-bold">
@@ -75,7 +75,7 @@
                                     {% for product in today_expiring %}
                                     <tr>
                                         <td>{{ product.id }}</td>
-                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.name|capfirst }}</td>
                                         <td>{{ product.quantity }} {{ product.unit }}</td>
                                         <td>{{ product.expiry_date }}</td>
                                     </tr>
@@ -114,7 +114,7 @@
                                     {% for product in soon_expiring %}
                                     <tr>
                                         <td>{{ product.id }}</td>
-                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.name|capfirst }}</td>
                                         <td>{{ product.quantity }} {{ product.unit }}</td>
                                         <td>{{ product.expiry_date }}</td>
                                         <td>{{ today|timesince:product.expiry_date }}</td>
@@ -154,7 +154,7 @@
                                     {% for product in upcoming_expiry %}
                                     <tr>
                                         <td>{{ product.id }}</td>
-                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.name|capfirst }}</td>
                                         <td>{{ product.quantity }} {{ product.unit }}</td>
                                         <td>{{ product.expiry_date }}</td>
                                         <td>{{ today|timesince:product.expiry_date }}</td>
@@ -194,7 +194,7 @@
                                     {% for product in thirty_days_expiry %}
                                     <tr>
                                         <td>{{ product.id }}</td>
-                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.name|capfirst }}</td>
                                         <td>{{ product.quantity }} {{ product.unit }}</td>
                                         <td>{{ product.expiry_date }}</td>
                                         <td>{{ today|timesince:product.expiry_date }}</td>

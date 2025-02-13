@@ -54,13 +54,13 @@
               <td class="cell">{{ order.id }}</td>
               <td class="cell">
                 <div class="d-flex align-items-center">
-                  <div>{{ c.get_name }}</div>
+                  <div>{{ c.get_name|capfirst }}</div>
                 </div>
               </td>
               <td class="cell">{{ c.mobile }}</td>
               {% endfor %}
               {% for p in product %}
-              <td class="cell">{{ p.name }}</td>
+              <td class="cell">{{ p.name|capfirst }}</td>
               <td class="cell">
                 <span class="badge bg-light text-dark">
                   {{ p.quantity }} {{ p.unit }}

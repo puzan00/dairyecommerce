@@ -25,12 +25,11 @@
             {% for item in cart_items %}
               <tr>
                 <td>{{ forloop.counter }}</td>
-                <td class="fw-semibold"><img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded-3" style="max-width: 60px; max-height: 60px; object-fit: cover;"> {{ item.product.name }}</td>
+                <td class="fw-semibold"><img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded-3" style="max-width: 60px; max-height: 60px; object-fit: cover;"> {{ item.product.name|capfirst }}</td>
 
                 <td>{{ item.product.quantity }} {{ item.product.unit }}</td>  
                 <td>Rs. {{ item.product.price }}</td>
-                        <!-- Display Quantity -->
-                     <!-- Display Unit -->
+                   >
                 <td>
                   <a class="btn btn-danger btn-sm" href="{% url 'remove-from-cart' item.id %}" role="button">
                     <i class="bi bi-trash"></i> Remove

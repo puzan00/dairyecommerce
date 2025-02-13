@@ -34,7 +34,10 @@
               <div class="col-md-6">
                 <div class="form-group">
                   <label for="unit" class="form-label">Unit</label>
-                  {% render_field productForm.unit class="form-control" placeholder="Enter unit" id="unit" %}
+                  <select name="unit" id="unit" class="form-control" required>
+                    <option value="kg" {% if productForm.unit.value == "kg" %}selected{% endif %}>kg</option>
+                    <option value="litre" {% if productForm.unit.value == "litre" %}selected{% endif %}>litre</option>
+                  </select>
                 </div>
               </div>
               <div class="col-12">
@@ -56,9 +59,6 @@
                   {% render_field productForm.expiry_date class="form-control" type="date" id="expiry_date" %}
                 </div>
               </div>
-              
-
-             
             </div>
             <div class="d-grid gap-2 mt-4">
               <button type="submit" class="btn btn-primary btn-md">Edit</button>
@@ -68,7 +68,6 @@
                 Cancel
               </a>
             </div>
-            
           </form>
         </div>
       </div>

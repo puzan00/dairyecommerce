@@ -55,7 +55,7 @@
                   </div>
                   {% endif %}
                   <div style="text-transform: capitalize;">
-                    <strong>{{ p.name }}</strong>
+                    <strong>{{ p.name|capfirst }}</strong>
                     <br>
                     <small class="text-muted">{{ p.description|truncatechars:50 }}</small>
                   </div>

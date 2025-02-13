@@ -57,7 +57,7 @@
                          height="40"
                          style="object-fit: cover;" />
                   </div>
-                  <div>{{ c.get_name }}</div>
+                  <div>{{ c.get_name |capfirst}}</div>
                 </div>
               </td>
               <td class="cell">{{ c.id }}</td>
@@ -71,7 +71,7 @@
                 <div class="d-flex align-items-center">
                   <i class="fas fa-map-marker-alt text-muted me-2"></i>
                   <span class="text-truncate" title="{{ c.address }}">
-                    {{ c.address }}
+                    {{ c.address|capfirst }}
                   </span>
                 </div>
               </td>
