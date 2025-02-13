@@ -1,19 +1,14 @@
 {% extends 'ecom/admin_base.html' %}
 {% load static %}
 {% block content %}
-<style>
 
-.custom-spacing div {
-  margin-left: 10px; 
-}
-</style>
-
+<!-- Main Container -->
 <div class="container-fluid">
   <div class="row g-4 py-4">
     <!-- Dashboard Header -->
     <div class="col-12">
       <h2 class="fw-bold text-dark">Admin Dashboard</h2>
-      <hr style="border: 0; height: 3px; background-color: #4CAF50; margin-top: 20px; margin-bottom: 20px;">
+      <hr class="border-4  my-4" style="height: 3px;">
 
     </div>
 
@@ -28,16 +23,18 @@
         <div class="card-header bg-white">
           <h5 class="card-title mb-0">Analytics Overview</h5>
         </div>
-        <div class="card-body">
-          <div class="row g-4">
-            <div class="col-md-6">
-              <div class="chart-container position-relative" style="height: 300px;">
-                <canvas id="ordersChart"></canvas>
+        <div class="card-body p-4">
+          <div class="row g-5">
+            <div class="col-md-6 col-12">
+              <div class="chart-container p-3">
+                <!-- Increased canvas size by using w-100 and h-75 for more height -->
+                <canvas id="ordersChart" class="w-100 h-75"></canvas>
               </div>
             </div>
-            <div class="col-md-6">
-              <div class="chart-container position-relative" style="height: 300px;">
-                <canvas id="productionChart"></canvas>
+            <div class="col-md-6 col-12">
+              <div class="chart-container p-3">
+                <!-- Increased canvas size by using w-100 and h-75 for more height -->
+                <canvas id="productionChart" class="w-100 h-75"></canvas>
               </div>
             </div>
           </div>
@@ -50,151 +47,162 @@
       <div class="card shadow">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
           <h3 class="card-title mb-0">Sales Analysis</h3>
-          
         </div>
-       
 
-          <!-- Sales Chart -->
-          <div class="row">
-            <div class="col-12">
-              <div class="card">
-                <div class="card-body">
-                  <canvas id="salesAnalysisChart" height="200"></canvas>
+        <!-- Sales Chart -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body p-4">
+                <!-- Canvas with Bootstrap utilities for height -->
+                <canvas id="salesAnalysisChart" class="w-100" style="height: 300px;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sales Report Table -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+              <table class="table table-hover table-striped" id="salesTable">
+                <thead class="table-light">
+                  <tr>
+                    <th>SN</th>
+                    <th>Customer</th>
+                    <th>Contact</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Order Date</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in recent_orders %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                      <div class="fw-bold">{{ order.customer.get_name }}</div>
+                      <div class="text-muted small">{{ order.address|truncatechars:20 }}</div>
+                    </td>
+                    <td>{{ order.customer.mobile }}</td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <img src="{{ order.product.product_image.url }}" class="rounded" width="40" height="40" alt="Product">
+                        <div>{{ order.product.name }}</div>
+                      </div>
+                    </td>
+                    <td>{{ order.product.quantity }} {{ order.product.unit }}</td>
+                    <td>{{ order.order_date|date:"M d, Y" }}</td>
+                    <td>Rs. {{ order.product.price }}</td>
+                    <td>
+                      {% if order.status == 'Pending' %}
+                      <span class="badge bg-warning text-dark">{{ order.status }}</span>
+                      {% elif order.status == 'Delivered' %}
+                      <span class="badge bg-success">{{ order.status }}</span>
+                      {% elif order.status == 'Out for Delivery' %}
+                      <span class="badge bg-info">{{ order.status }}</span>
+                      {% else %}
+                      <span class="badge bg-primary">{{ order.status }}</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expiry Alerts Section -->
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0 text-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>Expiry Alerts
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-4">
+            <!-- Expired Products -->
+            <div class="col-md-4 col-12 mb-3">
+              <h6 class="fw-bold mb-3">Expired Products</h6>
+              <div class="list-group">
+                {% for product in expired_products %}
+                <div class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="img-fluid me-2" style="width: 60px; height: 60px;">
+                    <div>
+                      <i class="fas fa-times-circle me-2"></i>
+                      {{ product.name }} (ID: {{ product.id }})
+                    </div>
+                  </div>
+                  <span class="badge bg-danger text-white">
+                    Expired: {{ product.expiry_date }}
+                  </span>
                 </div>
+                {% empty %}
+                <div class="list-group-item">No expired products.</div>
+                {% endfor %}
               </div>
             </div>
-          </div>
 
-          <!-- Sales Report Table -->
-     
-<div class="row mt-4">
-  <div class="col-12">
-    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;"> <!-- Scrollable Area -->
-      <table class="table table-hover table-striped" id="salesTable">
-        <thead class="table-light">
-          <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h3 class="card-title mb-0">Sales Report Table</h3>
-          </div>
-          <tr>
-            <th>SN</th>
-            <th>Customer</th>
-            <th>Contact</th>
-            <th>Product</th>
-            <th>Quantity</th>
-            <th>Order Date</th>
-            <th>Price</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for order in recent_orders %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-              <div class="fw-bold">{{ order.customer.get_name }}</div>
-              <div class="text-muted small">{{ order.address|truncatechars:20 }}</div>
-            </td>
-            <td>{{ order.customer.mobile }}</td>
-            <td>
-              <div class="d-flex align-items-center custom-spacing">
-                <img src="{{ order.product.product_image.url }}" class="rounded" width="40" height="40" alt="Product">
-                <div>{{ order.product.name }}</div>
+            <!-- Expiring in 3 Days -->
+            <div class="col-md-4 col-12 mb-3">
+              <h6 class="fw-bold mb-3">Expiring in 3 Days</h6>
+              <div class="list-group">
+                {% for product in soon_expiring %}
+                <div class="list-group-item list-group-item-warning d-flex justify-content-between align-items-center" 
+                     title="Expires in 3 days: {{ product.expiry_date|date:'M d, Y' }}">
+                  <div class="d-flex align-items-center">
+                    <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="img-fluid me-2" style="width: 60px; height: 60px;">
+                    <div>
+                      <i class="fas fa-clock me-2"></i>
+                      {{ product.name }} (ID: {{ product.id }})
+                    </div>
+                  </div>
+                  <span class="badge bg-warning text-dark">
+                    {{ product.quantity }} {{ product.unit }}
+                  </span>
+                </div>
+                {% empty %}
+                <div class="list-group-item">No products expiring in 3 days.</div>
+                {% endfor %}
               </div>
-            </td>
-            
-            <td>{{ order.product.quantity }} {{ order.product.unit }}</td>
-            <td>{{ order.order_date|date:"M d, Y" }}</td>
-            <td>Rs. {{ order.product.price }}</td>
-            <td>
-              {% if order.status == 'Pending' %}
-              <span class="badge bg-warning text-dark">{{ order.status }}</span>
-              {% elif order.status == 'Delivered' %}
-              <span class="badge bg-success">{{ order.status }}</span>
-              {% elif order.status == 'Out for Delivery' %}
-              <span class="badge bg-info">{{ order.status }}</span>
-              {% else %}
-              <span class="badge bg-primary">{{ order.status }}</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-</div>
+            </div>
 
-   <!-- Expiry Alerts Section -->
-<div class="col-12">
-  <div class="card shadow-sm">
-    <div class="card-header bg-white">
-      <h5 class="card-title mb-0 text-danger">
-        <i class="fas fa-exclamation-triangle me-2"></i>Expiry Alerts
-      </h5>
-    </div>
-    <div class="card-body">
-      <div class="row g-4">
-        <div class="col-md-4">
-          <h6 class="fw-bold mb-3">Expired Products</h6>
-          <div class="list-group">
-            {% for product in expired_products %}
-            <div class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center"> <!-- Changed to 'danger' for red -->
-              <div>
-                <i class="fas fa-times-circle me-2"></i>
-                {{ product.name }}
+            <!-- Expiring in 7 Days -->
+            <div class="col-md-4 col-12 mb-3">
+              <h6 class="fw-bold mb-3">Expiring in 7 Days</h6>
+              <div class="list-group">
+                {% for product in week_expiring %}
+                <div class="list-group-item list-group-item-info d-flex justify-content-between align-items-center" 
+                     title="Expires in 7 days: {{ product.expiry_date|date:'M d, Y' }}">
+                  <div class="d-flex align-items-center">
+                    <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="img-fluid me-2" style="width: 60px; height: 60px;">
+                    <div>
+                      <i class="fas fa-clock me-2"></i>
+                      {{ product.name }} (ID: {{ product.id }})
+                    </div>
+                  </div>
+                  <span class="badge bg-info text-dark">
+                    {{ product.quantity }} {{ product.unit }}
+                  </span>
+                </div>
+                {% empty %}
+                <div class="list-group-item">No products expiring in 7 days.</div>
+                {% endfor %}
               </div>
-              <span class="badge bg-danger text-white">
-                Expired: {{ product.expiry_date }}
-              </span>
             </div>
-            {% endfor %}
-          </div>
-        </div>
-        <div class="col-md-4">
-          <h6 class="fw-bold mb-3">Warning (7 Days)</h6>
-          <div class="list-group">
-            {% for product in expiry_7_days %}
-            <div class="list-group-item list-group-item-warning d-flex justify-content-between align-items-center" 
-                 title="Expires on: {{ product.expiry_date|date:'M d, Y' }}">
-              <div>
-                <i class="fas fa-clock me-2"></i>
-                {{ product.name }}
-              </div>
-              <span class="badge bg-warning text-dark">
-                {{ product.quantity }} {{ product.unit }}
-              </span>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <h6 class="fw-bold mb-3">Expiring Soon (30 Days)</h6>
-          <div class="list-group">
-            {% for product in expiry_30_days %}
-            <div class="list-group-item list-group-item-success d-flex justify-content-between align-items-center" 
-                 title="Expires on: {{ product.expiry_date|date:'M d, Y' }}">
-              <div>
-                <i class="fas fa-exclamation-circle me-2"></i>
-                {{ product.name }}
-              </div>
-              <span class="badge bg-success text-white">
-                {{ product.quantity }} {{ product.unit }}
-              </span>
-            </div>
-            {% endfor %}
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-
-
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

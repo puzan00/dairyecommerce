@@ -1,0 +1,215 @@
+{% extends 'ecom/admin_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="row g-4">
+
+        <div class="col d-flex justify-content-between align-items-center">
+            <h2><i class="fas fa-exclamation-triangle text-danger"></i> Product Expiry Alerts</h2>
+        </div>
+        <hr class="border-4  my-3">
+        <!-- Expired Products -->
+        <div class="col-12">
+            <div class="card border-danger h-100" id="expiredCard">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-times-circle me-2"></i>Expired Products</h5>
+                    <span class="badge bg-light text-danger fs-6">{{ expired_products.count }}</span>
+                </div>
+                <div class="card-body overflow-auto" style="max-height: 300px;">
+                    {% if expired_products %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Product Name</th>
+                                        <th>Quantity</th>
+                                        <th>Expiry Date</th>
+                                        <th>Days Expired</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in expired_products %}
+                                    <tr>
+                                        <td>{{ product.id }}</td>
+                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.quantity }} {{ product.unit }}</td>
+                                        <td>{{ product.expiry_date }}</td>
+                                        <td class="text-danger fw-bold">
+                                            {{ product.expiry_date|timesince:today }} ago
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No expired products</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Expiring Today -->
+        <div class="col-md-6">
+            <div class="card border-warning h-100">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Expiring Today</h5>
+                    <span class="badge bg-dark fs-6">{{ today_expiring.count }}</span>
+                </div>
+                <div class="card-body overflow-auto" style="max-height: 300px;">
+                    {% if today_expiring %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Product Name</th>
+                                        <th>Quantity</th>
+                                        <th>Expiry Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in today_expiring %}
+                                    <tr>
+                                        <td>{{ product.id }}</td>
+                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.quantity }} {{ product.unit }}</td>
+                                        <td>{{ product.expiry_date }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No products expiring today</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Expiring Soon (Within 3 Days) -->
+        <div class="col-md-6">
+            <div class="card border-info h-100">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-hourglass-half me-2"></i>Expiring Soon (Within 3 Days)</h5>
+                    <span class="badge bg-light text-info fs-6">{{ soon_expiring.count }}</span>
+                </div>
+                <div class="card-body overflow-auto" style="max-height: 300px;">
+                    {% if soon_expiring %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Product Name</th>
+                                        <th>Quantity</th>
+                                        <th>Expiry Date</th>
+                                        <th>Days Until Expiry</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in soon_expiring %}
+                                    <tr>
+                                        <td>{{ product.id }}</td>
+                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.quantity }} {{ product.unit }}</td>
+                                        <td>{{ product.expiry_date }}</td>
+                                        <td>{{ today|timesince:product.expiry_date }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No products expiring soon</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Expiry (4-7 Days) -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Upcoming Expiry (4-7 Days)</h5>
+                    <span class="badge bg-secondary fs-6">{{ upcoming_expiry.count }}</span>
+                </div>
+                <div class="card-body overflow-auto" style="max-height: 300px;">
+                    {% if upcoming_expiry %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Product Name</th>
+                                        <th>Quantity</th>
+                                        <th>Expiry Date</th>
+                                        <th>Days Until Expiry</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in upcoming_expiry %}
+                                    <tr>
+                                        <td>{{ product.id }}</td>
+                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.quantity }} {{ product.unit }}</td>
+                                        <td>{{ product.expiry_date }}</td>
+                                        <td>{{ today|timesince:product.expiry_date }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No products with upcoming expiry</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Within 30 Days Expiry -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Within 30 Days Expiry (8-30 Days)</h5>
+                    <span class="badge bg-secondary fs-6">{{ thirty_days_expiry.count }}</span>
+                </div>
+                <div class="card-body overflow-auto" style="max-height: 300px;">
+                    {% if thirty_days_expiry %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Product Name</th>
+                                        <th>Quantity</th>
+                                        <th>Expiry Date</th>
+                                        <th>Days Until Expiry</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in thirty_days_expiry %}
+                                    <tr>
+                                        <td>{{ product.id }}</td>
+                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.quantity }} {{ product.unit }}</td>
+                                        <td>{{ product.expiry_date }}</td>
+                                        <td>{{ today|timesince:product.expiry_date }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No products expiring within 30 days</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

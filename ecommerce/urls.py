@@ -5,6 +5,7 @@ from django.contrib.auth.views import LoginView
 from django.conf import settings
 from django.conf.urls.static import static
 from ecom.views import admin_login_view 
+from ecom.views import expiry_alert_list
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -25,6 +26,7 @@ urlpatterns = [
     path("admin-add-product/", views.admin_add_product_view, name="admin-add-product"),  # Added slash
     path("delete-product/<int:pk>/", views.delete_product_view, name="delete-product"),  # Added slash
     path("update-product/<int:pk>/", views.update_product_view, name="update-product"),  # Added slash
+    path("expiry-alerts/", expiry_alert_list, name="expiry-alerts"),
     path(
         "admin-view-booking/", views.admin_view_booking_view, name="admin-view-booking"
     ),  # Added slash
