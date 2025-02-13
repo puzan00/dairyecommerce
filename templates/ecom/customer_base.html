@@ -10,61 +10,33 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
-    <style>
-        .navbar-brand {
-            font-size: 25px;
-            font-weight: bold;
-        }
-        .product-image-container {
-            height: 200px;
-            overflow: hidden;
-        }
-        .product-image-container img {
-            object-fit: cover;
-            height: 100%;
-            width: 100%;
-        }
-        .navbar-nav.navbar-center {
-            position: absolute;
-            left: 50%;
-            transform: translatex(-50%);
-        }
-        @media (max-width: 991px) {
-            .navbar-nav.navbar-center {
-                position: static;
-                transform: none;
-            }
-
-            .navbar-nav .input-group .form-control {
-                border-right: none;
-            }
-            .navbar-nav .input-group .btn {
-                border-left: none;
-            }
-            .navbar-nav .input-group .form-control:focus {
-                box-shadow: none;
-                border-color: #ced4da;
-            }
-        }
-    </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}"><i class="fas fa-cow me-2"></i>Hamro Dairy</a>
+            <a class="navbar-brand fs-3 fw-bold" href="{% url 'home' %}">
+                <i class="fas fa-cow me-2"></i>Hamro Dairy
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'my-order' %}"><i class="fas fa-truck me-1"></i>Track Orders</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'my-profile' %}"><i class="fas fa-user me-1"></i>Profile</a></li>
+                    <li class="nav-item {% if request.path == '/my-order' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'my-order' %}">
+                            <i class="fas fa-truck me-1"></i> Track Orders
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.path == '/my-profile' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'my-profile' %}">
+                            <i class="fas fa-user me-1"></i> Profile
+                        </a>
+                    </li>
                 </ul>
                 
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
+                    <li class="nav-item {% if request.path == '/cart' %}active{% endif %}">
                         <a href="{% url 'cart' %}" class="btn btn-warning me-2 position-relative">
                             <i class="fas fa-shopping-cart"></i> Cart
                             {% if product_count_in_cart > 0 %}
@@ -78,7 +50,9 @@
                     <li class="nav-item">
                         <form action="{% url 'logout' %}" method="post" class="d-inline">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-light"><i class="fas fa-sign-out-alt me-1"></i>Logout</button>
+                            <button type="submit" class="btn btn-outline-light">
+                                <i class="fas fa-sign-out-alt me-1"></i> Logout
+                            </button>
                         </form>
                     </li>
                 </ul>
@@ -95,10 +69,8 @@
     </main>
 
     {% include 'ecom/footer.html' %}
-   
+
     <!-- Bootstrap 5.3 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JavaScript for Product Filtering -->
-    
 </body>
 </html>

@@ -20,6 +20,7 @@ from django.template.loader import get_template
 from django.template import Context
 from django.urls import reverse
 from django.utils.timezone import now, timedelta
+from django.contrib.auth.models import User, Group
 
 # Home view: Displays the homepage with a list of products.
 def home_view(request):
@@ -127,28 +128,29 @@ def admin_dashboard_view(request):
     # Recent Orders Data
     recent_orders = orders[:10]
 
-    # Expiry Alert Data
+  # Expiry Alert Data
     today = now().date()
     tomorrow = today + timedelta(days=1)
     three_days = today + timedelta(days=3)
     week_later = today + timedelta(days=7)
     thirty_days_later = today + timedelta(days=30)
 
-    # Get products in different expiry categories
+    # Expiry categories (same as expiry_alert_list)
     expired_products = Product.objects.filter(expiry_date__lt=today)
+    today_expiring = Product.objects.filter(expiry_date=today)
     soon_expiring = Product.objects.filter(expiry_date__range=[tomorrow, three_days])
-    week_expiring = Product.objects.filter(expiry_date__range=[three_days + timedelta(days=1), week_later])
+    upcoming_expiry = Product.objects.filter(expiry_date__range=[three_days + timedelta(days=1), week_later])
     thirty_days_expiring = Product.objects.filter(expiry_date__range=[week_later + timedelta(days=1), thirty_days_later])
 
     # Calculate counts
     expired_count = expired_products.count()
-    near_expiry_count = soon_expiring.count() + week_expiring.count()
+    near_expiry_count = today_expiring.count() + soon_expiring.count()
 
-    # Update expiry alert count in session to ensure it updates after login
+    # Update session counts
     request.session['expired_count'] = expired_count
     request.session['near_expiry_count'] = near_expiry_count
     request.session.modified = True  # Ensure session is updated
-
+    
     # Orders Status Distribution
     order_status_count = {
         "Pending": orders.filter(status="Pending").count(),
@@ -219,8 +221,10 @@ def admin_dashboard_view(request):
         "lowest_sales_unit": lowest_sales_unit,
         "recent_orders": recent_orders,
         "expired_products": expired_products,
+        "today_expiring": today_expiring,
         "soon_expiring": soon_expiring,
-        "week_expiring": week_expiring,
+        "upcoming_expiry": upcoming_expiry,
+        "thirty_days_expiring": thirty_days_expiring,
         'expired_count': expired_count,
         'near_expiry_count': near_expiry_count,
         'today': today,
@@ -585,7 +589,6 @@ def remove_from_cart_view(request, pk):
 
     return redirect("cart")
 
-
 @login_required(login_url="customerlogin")
 @user_passes_test(is_customer)
 def customer_home_view(request):
@@ -594,17 +597,18 @@ def customer_home_view(request):
 
     # Get current date to compare expiry date
     today = timezone.now().date()
+    three_days_later = today + timedelta(days=3)
 
     # Identify out-of-stock products based on order statuses
     out_of_stock_products = products.filter(
         orders__status__in=["Pending", "Order Confirmed", "Out for Delivery", "Delivered"]
     ).distinct()
 
-    # Filter expired products
-    expired_products = products.filter(expiry_date__lt=today)
+    # Filter expired products or products expiring within the next 3 days
+    expired_or_near_expiry_products = products.filter(expiry_date__lte=three_days_later)
 
-    # Products that are still in stock and not expired
-    in_stock_products = products.exclude(id__in=out_of_stock_products).exclude(id__in=expired_products)
+    # Products that are still in stock and not expired or near expiry
+    in_stock_products = products.exclude(id__in=out_of_stock_products).exclude(id__in=expired_or_near_expiry_products)
 
     # Fetch the current customer's cart items
     customer = get_object_or_404(Customer, user=request.user)
@@ -622,7 +626,7 @@ def customer_home_view(request):
             "product_count_in_cart": product_count_in_cart,
         }
     )
-    
+
     
 # shipment address before placing order
 @login_required(login_url="customerlogin")

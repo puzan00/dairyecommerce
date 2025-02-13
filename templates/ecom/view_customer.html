@@ -7,7 +7,7 @@
     <div class="col-auto">
       <h2 class="app-page-title mb-0">Customer Management</h2>
     </div>
-    <hr class="border-4  my-4">
+    
     <div class="col-auto">
       <div class="page-utilities">
         <div class="row g-2 justify-content-start justify-content-md-end align-items-center">
@@ -22,6 +22,7 @@
       </div>
     </div>
   </div>
+  <hr class="border-4  my-4">
   {% if not customers %}
   <div class="alert alert-info text-center" role="alert">
     <h3 class="mb-0">No Customers Registered</h3>
@@ -93,47 +94,6 @@
 
 <style>
  
-
-  .app-card {
-    background: #fff;
-    border-radius: 0.25rem;
-  }
-
-  .app-card .card-body {
-    padding: 1.5rem;
-  }
-
-  .app-table-hover > tbody > tr:hover {
-    background-color: rgb(190, 221, 220); /* Light pastel green */
-  }
-
-  .app-icon-holder {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 500;
-    overflow: hidden;
-    margin-right: 10px;
-  }
-
-  .table > :not(caption) > * > * {
-    padding: 0.75rem 1rem;
-    background-color: var(--bs-table-bg);
-    border-bottom-width: 1px;
-    box-shadow: inset 0 0 0 9999px var(--bs-table-accent-bg);
-  }
-
-  .badge {
-    font-weight: 500;
-    font-size: 0.75rem;
-    padding: 0.25em 0.5em;
-  }
 
   .search-customers {
     min-width: 250px;
