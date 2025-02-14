@@ -88,8 +88,6 @@ def customer_signup_view(request):
                 my_customer_group = Group.objects.get_or_create(name="CUSTOMER")
                 my_customer_group[0].user_set.add(user)
 
-                # Add success message
-                messages.success(request, "Account created successfully!")
                 return redirect('customerlogin')  # Use the 'redirect' method with the named URL
 
     # Render the signup page with form data
@@ -135,7 +133,7 @@ def admin_dashboard_view(request):
     week_later = today + timedelta(days=7)
     thirty_days_later = today + timedelta(days=30)
 
-    # Expiry categories (same as expiry_alert_list)
+    # Expiry categories
     expired_products = Product.objects.filter(expiry_date__lt=today)
     today_expiring = Product.objects.filter(expiry_date=today)
     soon_expiring = Product.objects.filter(expiry_date__range=[tomorrow, three_days])
@@ -233,6 +231,7 @@ def admin_dashboard_view(request):
         "production_quantities": production_quantities,
         "production_dates": production_dates,
     }
+    
 
     return render(request, "ecom/admin_dashboard.html", context)
 

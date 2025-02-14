@@ -69,9 +69,9 @@ class Cart(models.Model):
 
 class ProductProduction(models.Model):
     product_name = models.CharField(max_length=100, null=True, blank=True)
-    product_unit = models.CharField(max_length=20, null=True, blank=True) # Store the product unit (e.g., 'kg', 'liters')
-    quantity_produced = models.FloatField()         # Quantity of product produced
-    production_date = models.DateField(default=now) # Date of production
+    product_unit = models.CharField(max_length=20, null=True, blank=True) 
+    quantity_produced = models.FloatField()        
+    production_date = models.DateField(default=now) 
 
     def __str__(self):
         return f"{self.quantity_produced} {self.product_unit} of {self.product_name} produced on {self.production_date}"

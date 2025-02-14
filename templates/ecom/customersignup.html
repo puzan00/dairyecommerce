@@ -38,10 +38,13 @@
                   {% render_field userForm.username class="form-control" placeholder="Choose a username" %}
                 </div>
                 <div class="col-md-6">
-                  <label for="{{ userForm.password.id_for_label }}" class="form-label">Password</label>
+                  <label for="{{ userForm.password.id_for_label }}" class="form-label">
+                    Password <small class="text-muted">(e.g., Hari@7872)</small>
+                  </label>
                   {% render_field userForm.password class="form-control" placeholder="Create a strong password" %}
-                  <small id="passwordError" class="form-text text-danger" style="display:none;">Password must be at least 8 characters, include an uppercase letter, a number, and a special character.</small>
                 </div>
+                
+                
                 <div class="col-12">
                   <label for="{{ customerForm.address.id_for_label }}" class="form-label">Address</label>
                   {% render_field customerForm.address class="form-control" placeholder="Enter your address" %}

@@ -117,91 +117,91 @@
       </div>
     </div>
 
-    <!-- Expiry Alerts Section -->
-    <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-header bg-white">
-          <h5 class="card-title mb-0 text-danger">
-            <i class="fas fa-exclamation-triangle me-2"></i>Expiry Alerts
-          </h5>
+  <!-- Expiry Alerts Section -->
+<div class="col-12">
+  <div class="card shadow-sm">
+    <div class="card-header bg-white">
+      <h5 class="card-title mb-0 text-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>Expiry Alerts
+      </h5>
+    </div>
+    <div class="card-body p-3">
+      <div class="row g-2">
+        <!-- Expired Products -->
+        <div class="col-md-4 col-12 mb-3">
+          <h6 class="fw-bold mb-2 fs-6">Expired Products</h6>
+          <div class="list-group">
+            {% for product in expired_products %}
+            <div class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center py-2">
+              <div class="d-flex align-items-center">
+                <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="img-fluid me-2" style="width: 45px; height: 45px;">
+                <div>
+                  <i class="fas fa-times-circle me-1"></i>
+                  {{ product.name }} (ID: {{ product.id }})
+                </div>
+              </div>
+              <span class="badge bg-danger text-white fs-6">
+                Expired: {{ product.expiry_date }}
+              </span>
+            </div>
+            {% empty %}
+            <div class="list-group-item">No expired products.</div>
+            {% endfor %}
+          </div>
         </div>
-        <div class="card-body">
-          <div class="row g-4">
-            <!-- Expired Products -->
-            <div class="col-md-4 col-12 mb-3">
-              <h6 class="fw-bold mb-3">Expired Products</h6>
-              <div class="list-group">
-                {% for product in expired_products %}
-                <div class="list-group-item list-group-item-danger d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center">
-                    <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="img-fluid me-2" style="width: 60px; height: 60px;">
-                    <div>
-                      <i class="fas fa-times-circle me-2"></i>
-                      {{ product.name }} (ID: {{ product.id }})
-                    </div>
-                  </div>
-                  <span class="badge bg-danger text-white">
-                    Expired: {{ product.expiry_date }}
-                  </span>
-                </div>
-                {% empty %}
-                <div class="list-group-item">No expired products.</div>
-                {% endfor %}
-              </div>
-            </div>
 
-            <!-- Expiring in 3 Days -->
-            <div class="col-md-4 col-12 mb-3">
-              <h6 class="fw-bold mb-3">Expiring in 3 Days</h6>
-              <div class="list-group">
-                {% for product in soon_expiring %}
-                <div class="list-group-item list-group-item-warning d-flex justify-content-between align-items-center" 
-                     title="Expires in 3 days: {{ product.expiry_date|date:'M d, Y' }}">
-                  <div class="d-flex align-items-center">
-                    <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="img-fluid me-2" style="width: 60px; height: 60px;">
-                    <div>
-                      <i class="fas fa-clock me-2"></i>
-                      {{ product.name|capfirst }} (ID: {{ product.id }})
-                    </div>
-                  </div>
-                  <span class="badge bg-warning text-dark">
-                    {{ product.quantity }} {{ product.unit }}
-                  </span>
+        <!-- Expiring in 3 Days -->
+        <div class="col-md-4 col-12 mb-3">
+          <h6 class="fw-bold mb-2 fs-6">Expiring in 3 Days</h6>
+          <div class="list-group">
+            {% for product in soon_expiring %}
+            <div class="list-group-item list-group-item-warning d-flex justify-content-between align-items-center py-2" 
+                 title="Expires in 3 days: {{ product.expiry_date|date:'M d, Y' }}">
+              <div class="d-flex align-items-center">
+                <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="img-fluid me-2" style="width: 45px; height: 45px;">
+                <div>
+                  <i class="fas fa-clock me-1"></i>
+                  {{ product.name|capfirst }} (ID: {{ product.id }})
                 </div>
-                {% empty %}
-                <div class="list-group-item">No products expiring in 3 days.</div>
-                {% endfor %}
               </div>
+              <span class="badge bg-warning text-dark fs-6">
+                {{ product.quantity }} {{ product.unit }}
+              </span>
             </div>
+            {% empty %}
+            <div class="list-group-item">No products expiring in 3 days.</div>
+            {% endfor %}
+          </div>
+        </div>
 
-            <!-- Expiring in 7 Days -->
-            <div class="col-md-4 col-12 mb-3">
-              <h6 class="fw-bold mb-3">Expiring in 7 Days</h6>
-              <div class="list-group">
-                {% for product in week_expiring %}
-                <div class="list-group-item list-group-item-info d-flex justify-content-between align-items-center" 
-                     title="Expires in 7 days: {{ product.expiry_date|date:'M d, Y' }}">
-                  <div class="d-flex align-items-center">
-                    <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="img-fluid me-2" style="width: 60px; height: 60px;">
-                    <div>
-                      <i class="fas fa-clock me-2"></i>
-                      {{ product.name }} (ID: {{ product.id }})
-                    </div>
-                  </div>
-                  <span class="badge bg-info text-dark">
-                    {{ product.quantity }} {{ product.unit }}
-                  </span>
+        <!-- Expiring in 7 Days -->
+        <div class="col-md-4 col-12 mb-3">
+          <h6 class="fw-bold mb-2 fs-6">Expiring in 7 Days</h6>
+          <div class="list-group">
+            {% for product in upcoming_expiry %}
+            <div class="list-group-item list-group-item-info d-flex justify-content-between align-items-center py-2" 
+                 title="Expires in 7 days: {{ product.expiry_date|date:'M d, Y' }}">
+              <div class="d-flex align-items-center">
+                <img src="{{ product.product_image.url }}" alt="{{ product.name }}" class="img-fluid me-2" style="width: 45px; height: 45px;">
+                <div>
+                  <i class="fas fa-clock me-1"></i>
+                  {{ product.name }} (ID: {{ product.id }})
                 </div>
-                {% empty %}
-                <div class="list-group-item">No products expiring in 7 days.</div>
-                {% endfor %}
               </div>
+              <span class="badge bg-info text-dark fs-6">
+                {{ product.quantity }} {{ product.unit }}
+              </span>
             </div>
+            {% empty %}
+            <div class="list-group-item">No products expiring in 7 days.</div>
+            {% endfor %}
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

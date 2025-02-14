@@ -85,7 +85,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "dairyweb",
+        "NAME": "onlinedairymanagment",
         "USER": "postgres",
         "PASSWORD": "postgres",
         "HOST": "localhost",  # or your PostgreSQL server host
