@@ -33,10 +33,11 @@ class Product(models.Model):
     unit = models.CharField(max_length=20, default="kg")  # E.g., 'kg', 'liters'
     expiry_date = models.DateField(null=True, blank=True)  # Expiry tracking
     date_added = models.DateField(default=now)  # Add this field
+    is_sold = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.name} ({self.quantity} {self.unit})"
-
+    
 
 from django.db import models
 

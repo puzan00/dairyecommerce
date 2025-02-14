@@ -126,19 +126,28 @@ def admin_dashboard_view(request):
     # Recent Orders Data
     recent_orders = orders[:10]
 
-  # Expiry Alert Data
+    # Expiry Alert Data
     today = now().date()
     tomorrow = today + timedelta(days=1)
     three_days = today + timedelta(days=3)
     week_later = today + timedelta(days=7)
     thirty_days_later = today + timedelta(days=30)
 
-    # Expiry categories
-    expired_products = Product.objects.filter(expiry_date__lt=today)
-    today_expiring = Product.objects.filter(expiry_date=today)
-    soon_expiring = Product.objects.filter(expiry_date__range=[tomorrow, three_days])
-    upcoming_expiry = Product.objects.filter(expiry_date__range=[three_days + timedelta(days=1), week_later])
-    thirty_days_expiring = Product.objects.filter(expiry_date__range=[week_later + timedelta(days=1), thirty_days_later])
+    # Exclude sold products from all queries
+    expired_products = Product.objects.filter(expiry_date__lt=today, is_sold=False)
+    today_expiring = Product.objects.filter(expiry_date=today, is_sold=False)
+    soon_expiring = Product.objects.filter(
+        expiry_date__range=[tomorrow, three_days],
+        is_sold=False
+    )
+    upcoming_expiry = Product.objects.filter(
+        expiry_date__range=[three_days + timedelta(days=1), week_later],
+        is_sold=False
+    )
+    thirty_days_expiring = Product.objects.filter(
+        expiry_date__range=[week_later + timedelta(days=1), thirty_days_later],
+        is_sold=False
+    )
 
     # Calculate counts
     expired_count = expired_products.count()
@@ -333,6 +342,7 @@ def product_production_list_view(request):
         'product_totals': product_totals,
     })
 
+
 # admin view customer table
 @login_required(login_url="adminlogin")
 def view_customer_view(request):
@@ -364,108 +374,189 @@ def admin_products_view(request):
 @login_required(login_url="adminlogin")
 def admin_add_product_view(request):
     productForm = forms.ProductForm()
-    
+
     if request.method == "POST":
         productForm = forms.ProductForm(request.POST, request.FILES)
         if productForm.is_valid():
-            # Get the cleaned data from the form
+            # Save the new product
             product = productForm.save(commit=False)
             
             # Strip spaces and convert product name to lowercase
-            product.product_name = product.name.strip().lower()
+            product.name = product.name.strip().lower()
             
-            # Save the new product
+            # Save the product
             product.save()
-            
-            # Update notification counts
+
+            # Recalculate counts after adding the product
             today = now().date()
             three_days = today + timedelta(days=3)
-            
+
             # Calculate new counts
             expired_count = models.Product.objects.filter(expiry_date__lt=today).count()
             today_expiring = models.Product.objects.filter(expiry_date=today).count()
             soon_expiring = models.Product.objects.filter(
                 expiry_date__range=[today + timedelta(days=1), three_days]
             ).count()
-            
-            # Update session
+
+            # Update session variables
             request.session['expired_count'] = expired_count
             request.session['near_expiry_count'] = today_expiring + soon_expiring
-            request.session.modified = True
-            
+            request.session.modified = True  # Ensure session updates
+
+            # Redirect to the product list page
             return HttpResponseRedirect(reverse("admin-products"))
-    
+
     return render(request, "ecom/admin_add_products.html", {"productForm": productForm})
 
 
 # delete product
 @login_required(login_url="adminlogin")
-def delete_product_view(request, pk):
-    models.Product.objects.get(id=pk).delete()
+def delete_product(request, product_id):
+    # Get the product instance
+    product = get_object_or_404(Product, id=product_id)
 
-    # Update session expiry counts
+    # Ensure the product is not sold before deleting
+    if product.is_sold:
+        # Optionally, you can add a message indicating the product cannot be deleted
+        messages.error(request, "This product cannot be deleted because it has already been sold.")
+        return redirect('admin-products')
+
+    # Proceed with deletion if not sold
+    product.delete()
+
+    # Recalculate counts after deleting the product
     today = now().date()
-    request.session['expired_count'] = models.Product.objects.filter(expiry_date__lt=today).count()
-    request.session['near_expiry_count'] = models.Product.objects.filter(
-        expiry_date__range=[today, today + timedelta(days=3)]
+    three_days = today + timedelta(days=3)
+
+    expired_count = Product.objects.filter(expiry_date__lt=today, is_sold=False).count()
+    today_expiring = Product.objects.filter(expiry_date=today, is_sold=False).count()
+    soon_expiring = Product.objects.filter(
+        expiry_date__range=[today + timedelta(days=1), three_days],
+        is_sold=False
     ).count()
+
+    # Update session variables
+    request.session['expired_count'] = expired_count
+    request.session['near_expiry_count'] = today_expiring + soon_expiring
     request.session.modified = True  # Ensure session updates
 
-    return redirect("admin-products")
+    return redirect('admin-products')  # Redirect to the product management page
+
+
+@login_required(login_url="adminlogin")
+def mark_as_sold(request, product_id):
+    # Mark the product as sold
+    product = get_object_or_404(Product, id=product_id)
+    product.is_sold = True
+    product.save()
+
+    # Recalculate counts after marking the product as sold
+    today = now().date()
+    three_days = today + timedelta(days=3)
+
+    expired_count = Product.objects.filter(expiry_date__lt=today, is_sold=False).count()
+    today_expiring = Product.objects.filter(expiry_date=today, is_sold=False).count()
+    soon_expiring = Product.objects.filter(
+        expiry_date__range=[today + timedelta(days=1), three_days],
+        is_sold=False
+    ).count()
+
+    # Update session variables
+    request.session['expired_count'] = expired_count
+    request.session['near_expiry_count'] = today_expiring + soon_expiring
+    request.session.modified = True  # Ensure session updates
+
+    return redirect('admin-products') 
+
+@login_required(login_url="adminlogin")
+def unmark_as_sold(request, product_id):
+    # Unmark the product as sold
+    product = get_object_or_404(Product, id=product_id)
+    product.is_sold = False
+    product.save()
+
+    # Recalculate counts after unmarking the product as sold
+    today = now().date()
+    three_days = today + timedelta(days=3)
+
+    expired_count = Product.objects.filter(expiry_date__lt=today, is_sold=False).count()
+    today_expiring = Product.objects.filter(expiry_date=today, is_sold=False).count()
+    soon_expiring = Product.objects.filter(
+        expiry_date__range=[today + timedelta(days=1), three_days],
+        is_sold=False
+    ).count()
+
+    # Update session variables
+    request.session['expired_count'] = expired_count
+    request.session['near_expiry_count'] = today_expiring + soon_expiring
+    request.session.modified = True  # Ensure session updates
+
+    return redirect('admin-products')
+
 
 
 @login_required(login_url="adminlogin")
 def update_product_view(request, pk):
-    product = models.Product.objects.get(id=pk)
+    # Get the product instance
+    product = get_object_or_404(models.Product, id=pk)
     productForm = forms.ProductForm(instance=product)
 
     if request.method == "POST":
         productForm = forms.ProductForm(request.POST, request.FILES, instance=product)
         if productForm.is_valid():
-            # Get the cleaned data from the form before saving
+            # Save the updated product
             product = productForm.save(commit=False)
             
             # Strip spaces and convert product name to lowercase
-            product.product_name = product.name.strip().lower()
+            product.name = product.name.strip().lower()
             
-            # Save the updated product
+            # Save the product
             product.save()
-            
-            # Update notification counts
+
+            # Recalculate counts after updating the product
             today = now().date()
             three_days = today + timedelta(days=3)
-            
+
             # Calculate new counts
             expired_count = models.Product.objects.filter(expiry_date__lt=today).count()
             today_expiring = models.Product.objects.filter(expiry_date=today).count()
             soon_expiring = models.Product.objects.filter(
                 expiry_date__range=[today + timedelta(days=1), three_days]
             ).count()
-            
-            # Update session
+
+            # Update session variables
             request.session['expired_count'] = expired_count
             request.session['near_expiry_count'] = today_expiring + soon_expiring
-            request.session.modified = True
-            
+            request.session.modified = True  # Ensure session updates
+
+            # Redirect to the product list page
             return redirect("admin-products")
 
     return render(request, "ecom/admin_update_product.html", {"productForm": productForm})
 # views.py
-
 @login_required(login_url="adminlogin")
-def expiry_alert_list(request): 
+def expiry_alert_list(request):
     today = now().date()
     tomorrow = today + timedelta(days=1)
     three_days = today + timedelta(days=3)
     week_later = today + timedelta(days=7)
     thirty_days = today + timedelta(days=30)
 
-    # Get products in different expiry categories
-    expired_products = models.Product.objects.filter(expiry_date__lt=today).order_by('expiry_date')
-    today_expiring = models.Product.objects.filter(expiry_date=today).order_by('expiry_date')
-    soon_expiring = models.Product.objects.filter(expiry_date__range=[tomorrow, three_days]).order_by('expiry_date')
-    upcoming_expiry = models.Product.objects.filter(expiry_date__range=[three_days + timedelta(days=1), week_later]).order_by('expiry_date')
-    thirty_days_expiry = models.Product.objects.filter(expiry_date__range=[week_later + timedelta(days=1), thirty_days]).order_by('expiry_date')
+    # Exclude sold products from all queries
+    expired_products = Product.objects.filter(expiry_date__lt=today, is_sold=False).order_by('expiry_date')
+    today_expiring = Product.objects.filter(expiry_date=today, is_sold=False).order_by('expiry_date')
+    soon_expiring = Product.objects.filter(
+        expiry_date__range=[tomorrow, three_days],
+        is_sold=False
+    ).order_by('expiry_date')
+    upcoming_expiry = Product.objects.filter(
+        expiry_date__range=[three_days + timedelta(days=1), week_later],
+        is_sold=False
+    ).order_by('expiry_date')
+    thirty_days_expiry = Product.objects.filter(
+        expiry_date__range=[week_later + timedelta(days=1), thirty_days],
+        is_sold=False
+    ).order_by('expiry_date')
 
     # Calculate counts
     expired_count = expired_products.count()
@@ -477,19 +568,17 @@ def expiry_alert_list(request):
         request.session['near_expiry_count'] = near_expiry_count
         request.session.modified = True  # Ensures session updates
 
-    context = { 
-        'expired_products': expired_products, 
-        'today_expiring': today_expiring, 
-        'soon_expiring': soon_expiring, 
-        'upcoming_expiry': upcoming_expiry, 
-        'thirty_days_expiry': thirty_days_expiry, 
+    context = {
+        'expired_products': expired_products,
+        'today_expiring': today_expiring,
+        'soon_expiring': soon_expiring,
+        'upcoming_expiry': upcoming_expiry,
+        'thirty_days_expiry': thirty_days_expiry,
         'critical_count': expired_count + near_expiry_count,  # Total count
-        'today': today, 
-    } 
+        'today': today,
+    }
 
     return render(request, "ecom/expiry_alerts.html", context)
-
-
 
 
 @login_required(login_url="adminlogin")

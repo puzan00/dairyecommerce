@@ -23,8 +23,10 @@ urlpatterns = [
     path("view-customer/", views.view_customer_view, name="view-customer"),  # Added slash
     
     path("admin-products/", views.admin_products_view, name="admin-products"),  # Added slash
-    path("admin-add-product/", views.admin_add_product_view, name="admin-add-product"),  # Added slash
-    path("delete-product/<int:pk>/", views.delete_product_view, name="delete-product"),  # Added slash
+    path("admin-add-product/", views.admin_add_product_view, name="admin-add-product"),
+     path('delete-product/<int:product_id>/', views.delete_product, name='delete_product'),# Added slash
+    path('mark-as-sold/<int:product_id>/', views.mark_as_sold, name='mark-as-sold'),
+    path('unmark-as-sold/<int:product_id>/', views.unmark_as_sold, name='unmark-as-sold'),
     path("update-product/<int:pk>/", views.update_product_view, name="update-product"),  # Added slash
     path("expiry-alerts/", expiry_alert_list, name="expiry-alerts"),
     path(

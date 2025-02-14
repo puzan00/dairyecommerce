@@ -70,6 +70,7 @@
                   <tr>
                     <th>SN</th>
                     <th>Customer</th>
+                    <th>Address</th>
                     <th>Contact</th>
                     <th>Product</th>
                     <th>Quantity</th>
@@ -83,13 +84,12 @@
                   <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>
-                      <div class="fw-bold">{{ order.customer.get_name|capfirst }}</div>
-                      <div class="text-muted small">{{ order.address|truncatechars:20 }}</div>
+                     {{ order.customer.get_name|capfirst }}
                     </td>
+                    <td>{{ order.address|capfirst}}</td>
                     <td>{{ order.customer.mobile }}</td>
                     <td>
                       <div class="d-flex align-items-center">
-                        <img src="{{ order.product.product_image.url }}" class="rounded" width="40" height="40" alt="Product">
                         <div>{{ order.product.name|capfirst }}</div>
                       </div>
                     </td>

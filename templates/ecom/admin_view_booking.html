@@ -13,14 +13,14 @@
           <div class="col-auto">
             <form class="table-search-form row gx-1 align-items-center">
               <div class="col-auto">
-                <input type="text" id="orderSearch" name="searchorders" class="form-control mb-3" placeholder="Search orders">
+                <input type="text" id="orderSearch" name="searchorders" class="form-control mb-3" placeholder="Search name....">
               </div>
               <div class="col-auto">
                 <select class="form-select w-auto mb-3" id="statusFilter">
                   <option value="">All Status</option>
                   <option value="pending">Pending</option>
+                  <option value="out for delivery">Out for Delivery</option>
                   <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
                 </select>
               </div>
             </form>
@@ -54,7 +54,7 @@
               <td class="cell">{{ order.id }}</td>
               <td class="cell">
                 <div class="d-flex align-items-center">
-                  <div>{{ c.get_name|capfirst }}</div>
+                  <div>{{ c.get_name|upper }}</div>
                 </div>
               </td>
               <td class="cell">{{ c.mobile }}</td>

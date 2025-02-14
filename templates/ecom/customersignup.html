@@ -37,17 +37,20 @@
                   <label for="{{ userForm.username.id_for_label }}" class="form-label">Username</label>
                   {% render_field userForm.username class="form-control" placeholder="Choose a username" %}
                 </div>
+                
+                
+                <div class="col-md-6">
+                  <label for="{{ customerForm.address.id_for_label }}" class="form-label">Address</label>
+                  {% render_field customerForm.address class="form-control" placeholder="Enter your address" %}
+                </div>
+
                 <div class="col-md-6">
                   <label for="{{ userForm.password.id_for_label }}" class="form-label">
                     Password <small class="text-muted">(e.g., Hari@7872)</small>
                   </label>
-                  {% render_field userForm.password class="form-control" placeholder="Create a strong password" %}
-                </div>
-                
-                
-                <div class="col-12">
-                  <label for="{{ customerForm.address.id_for_label }}" class="form-label">Address</label>
-                  {% render_field customerForm.address class="form-control" placeholder="Enter your address" %}
+                  {% render_field userForm.password class="form-control" placeholder="Create a strong password" id="passwordField" %}
+                   <small> Please remember your password. If you forget it, you will need to create a new account.
+                  </small>
                 </div>
                 <div class="col-md-6">
                   <label for="{{ customerForm.mobile.id_for_label }}" class="form-label">Contact</label>

@@ -112,15 +112,15 @@
                 <img src="{{ order.product.product_image.url }}" class="img-sm border rounded">
               </div>
               <div class="info">
-                <p class="fw-bold mb-1">{{ order.product.name }}</p>
-                <p class="text-muted mb-1">{{ order.product.description }}</p>
+                <p class="fw-bold mb-1">{{ order.product.name|capfirst }}</p>
+                <p class="text-muted mb-1">{{ order.product.description|capfirst }}</p>
                 <p class="mb-0">Price: Rs.{{ order.product.price }}</p>
               </div>
             </div>
           </div>
           <div class="col-md-4">
             <h6 class="fw-bold">Shipment Address:</h6>
-            <p>{{ order.address }}</p>
+            <p>{{ order.address|capfirst }}</p>
           </div>
           <div class="col-md-4">
             <h6 class="fw-bold">Status:</h6>

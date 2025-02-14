@@ -45,7 +45,7 @@
           {% with total_notifications=expired_count|add:near_expiry_count %}
           {% if total_notifications > 0 %}
           <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-              {{ total_notifications }}
+            {{ total_notifications }}
           </span>
           {% endif %}
           {% endwith %}
@@ -71,22 +71,45 @@
   </div>
 
   {% include 'ecom/footer.html' %}
-
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const badge = document.getElementById('notificationBadge');
+      const expiryAlertLink = document.getElementById('expiryAlertLink');
+  
+      // Ensure the badge is visible only if there are notifications
+      function updateBadgeVisibility() {
+        if (badge) {
+          const count = parseInt(badge.textContent);
+          if (count > 0) {
+            badge.style.display = 'inline-block';
+          } else {
+            badge.style.display = 'none';
+          }
+        }
+      }
+  
+      // Update badge visibility when "Expiry Alerts" link is clicked
+      if (expiryAlertLink) {
+        expiryAlertLink.addEventListener('click', function (e) {
+          // Hide the badge immediately
+          if (badge) {
+            badge.style.display = 'none';
+          }
+  
+          // Allow navigation to proceed normally
+          // No need to prevent default behavior here
+        });
+      }
+  
+      // Set initial visibility of the badge
+      updateBadgeVisibility();
+    });
+  </script>
+  
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const badge = document.getElementById('notificationBadge');
-    
-        // Ensure badge is always visible if it exists and notifications are present
-        if (badge && parseInt(badge.textContent) > 0) {
-            badge.style.display = 'inline-block';
-        }
-    });
-  </script>
 
 </body>
 </html>
