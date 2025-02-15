@@ -42,80 +42,60 @@
       </div>
     </div>
 
-    <!-- Sales Report and Analysis Section -->
-    <div class="col-12">
-      <div class="card shadow">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-          <h3 class="card-title mb-0">Sales Analysis</h3>
-        </div>
+<!-- Sales Report and Analysis Section -->
+<div class="col-12">
+  <div class="card shadow">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+      <h4 class="card-title mb-0 fw-bold">Sales Analysis</h4>
+    </div>
 
-        <!-- Sales Chart -->
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-body p-4">
-                <!-- Canvas with Bootstrap utilities for height -->
-                <canvas id="salesAnalysisChart" class="w-100" style="height: 300px;"></canvas>
-              </div>
-            </div>
+    <div class="card-body">
+      <div class="row">
+        <!-- Sales Report Table -->
+        <div class="col-lg-7">
+          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+            <table class="table table-hover table-bordered table-striped table-sm align-middle" id="salesTable">
+              <thead>
+                <tr class="table-primary text-center">
+                  <th class="text-nowrap">SN</th>
+                  <th class="text-nowrap">Customer</th>
+                  <th class="text-nowrap">Product</th>
+                  <th class="text-nowrap">Quantity</th>
+                  <th class="text-nowrap">Price</th>
+                  <th class="text-nowrap">Address</th>
+                  <th class="text-nowrap">Contact</th>
+                  <th class="text-nowrap">Order Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                  <td class="text-center fw-bold">{{ forloop.counter }}</td>
+                  <td>{{ order.customer.get_name|capfirst }}</td>
+                  <td>{{ order.product.name|capfirst }}</td>
+                  <td class="text-end">{{ order.product.quantity }} {{ order.product.unit }}</td>
+                  <td class="text-end">Rs. {{ order.product.price }}</td>
+                  <td>{{ order.address|capfirst }}</td>
+                  <td>{{ order.customer.mobile }}</td>
+                  <td class="text-center">{{ order.order_date|date:"M d, Y" }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <!-- Sales Report Table -->
-        <div class="row mt-4">
-          <div class="col-12">
-            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-              <table class="table table-hover table-striped" id="salesTable">
-                <thead class="table-light">
-                  <tr>
-                    <th>SN</th>
-                    <th>Customer</th>
-                    <th>Address</th>
-                    <th>Contact</th>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Order Date</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for order in recent_orders %}
-                  <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>
-                     {{ order.customer.get_name|capfirst }}
-                    </td>
-                    <td>{{ order.address|capfirst}}</td>
-                    <td>{{ order.customer.mobile }}</td>
-                    <td>
-                      <div class="d-flex align-items-center">
-                        <div>{{ order.product.name|capfirst }}</div>
-                      </div>
-                    </td>
-                    <td>{{ order.product.quantity }} {{ order.product.unit }}</td>
-                    <td>{{ order.order_date|date:"M d, Y" }}</td>
-                    <td>Rs. {{ order.product.price }}</td>
-                    <td>
-                      {% if order.status == 'Pending' %}
-                      <span class="badge bg-warning text-dark">{{ order.status }}</span>
-                      {% elif order.status == 'Delivered' %}
-                      <span class="badge bg-success">{{ order.status }}</span>
-                      {% elif order.status == 'Out for Delivery' %}
-                      <span class="badge bg-info">{{ order.status }}</span>
-                      {% else %}
-                      <span class="badge bg-primary">{{ order.status }}</span>
-                      {% endif %}
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
+        <!-- Sales Chart -->
+        <div class="col-lg-5">
+          <div class="chart-container border rounded p-2" style="position: relative; height: 300px; width: 100%;">
+            <canvas id="salesAnalysisChart"></canvas>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
+
 
   <!-- Expiry Alerts Section -->
 <div class="col-12">
@@ -206,119 +186,202 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  // Orders Chart
-  const ordersCtx = document.getElementById('ordersChart').getContext('2d');
-  const ordersChart = new Chart(ordersCtx, {
-    type: 'bar',
-    data: {
-      labels: ['Pending', 'Confirmed', 'Out for Delivery', 'Delivered'],
-      datasets: [{
-        label: 'Order Status',
-        data: [
-          {{ order_status_count.Pending }},
-          {{ order_status_count.OrderConfirmed }},
-          {{ order_status_count.OutforDelivery }},
-          {{ order_status_count.Delivered }},
-        ],
-        backgroundColor: [
-          'rgba(243, 156, 18, 0.7)',
-          'rgba(52, 152, 219, 0.7)',
-          'rgba(243, 156, 18, 0.7)',
-          'rgba(39, 174, 96, 0.7)'
-        ],
-        borderColor: [
-          'rgb(243, 156, 18)',
-          'rgb(52, 152, 219)',
-          'rgb(243, 156, 18)',
-          'rgb(39, 174, 96)'
-        ],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        title: {
-          display: true,
-          text: 'Order Status Distribution'
-        }
-      },
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
-  });
+// Orders Chart
+const ordersCtx = document.getElementById('ordersChart').getContext('2d');
 
-  // Product Production Chart
-// Dynamic Colors for Bars
-const generateColors = (count) => {
-  const backgroundColors = [];
-  const borderColors = [];
-  const colorPalette = [
-    'rgba(75, 192, 192, 0.2)',
-    'rgba(153, 102, 255, 0.2)',
-    'rgba(255, 159, 64, 0.2)',
-    'rgba(54, 162, 235, 0.2)',
-    'rgba(255, 99, 132, 0.2)',
-    'rgba(255, 205, 86, 0.2)',
-    'rgba(201, 203, 207, 0.2)'
-  ];
+// Create gradient backgrounds
+const pendingGradient = ordersCtx.createLinearGradient(0, 0, 0, 400);
+pendingGradient.addColorStop(0, 'rgba(255, 206, 86, 0.8)');
+pendingGradient.addColorStop(1, 'rgba(255, 206, 86, 0.2)');
 
-  const borderPalette = [
-    'rgba(75, 192, 192, 1)',
-    'rgba(153, 102, 255, 1)',
-    'rgba(255, 159, 64, 1)',
-    'rgba(54, 162, 235, 1)',
-    'rgba(255, 99, 132, 1)',
-    'rgba(255, 205, 86, 1)',
-    'rgba(201, 203, 207, 1)'
-  ];
+const confirmedGradient = ordersCtx.createLinearGradient(0, 0, 0, 400);
+confirmedGradient.addColorStop(0, 'rgba(54, 162, 235, 0.8)');
+confirmedGradient.addColorStop(1, 'rgba(54, 162, 235, 0.2)');
 
-  for (let i = 0; i < count; i++) {
-    backgroundColors.push(colorPalette[i % colorPalette.length]);
-    borderColors.push(borderPalette[i % borderPalette.length]);
-  }
+const outForDeliveryGradient = ordersCtx.createLinearGradient(0, 0, 0, 400);
+outForDeliveryGradient.addColorStop(0, 'rgba(255, 159, 64, 0.8)');
+outForDeliveryGradient.addColorStop(1, 'rgba(255, 159, 64, 0.2)');
 
-  return { backgroundColors, borderColors };
-};
+const deliveredGradient = ordersCtx.createLinearGradient(0, 0, 0, 400);
+deliveredGradient.addColorStop(0, 'rgba(75, 192, 192, 0.8)');
+deliveredGradient.addColorStop(1, 'rgba(75, 192, 192, 0.2)');
 
-// Fetch data from Django context
-const labels = {{ production_labels|safe }};
-const dataPoints = {{ production_quantities|safe }};
-const { backgroundColors, borderColors } = generateColors(labels.length);
-
-// Product Production Chart
-const productionCtx = document.getElementById('productionChart').getContext('2d');
-const productionChart = new Chart(productionCtx, {
+const ordersChart = new Chart(ordersCtx, {
   type: 'bar',
   data: {
-    labels: labels,
+    labels: ['Pending', 'Confirmed', 'Out for Delivery', 'Delivered'],
     datasets: [{
-      label: 'Quantity Produced',
-      data: dataPoints,
-      backgroundColor: backgroundColors,
-      borderColor: borderColors,
-      borderWidth: 1
+      label: 'Order Status',
+      data: [
+        {{ order_status_count.Pending }},
+        {{ order_status_count.OrderConfirmed }},
+        {{ order_status_count.OutforDelivery }},
+        {{ order_status_count.Delivered }},
+      ],
+      backgroundColor: [
+        pendingGradient,
+        confirmedGradient,
+        outForDeliveryGradient,
+        deliveredGradient
+      ],
+      borderColor: [
+        'rgb(255, 206, 86)',  // Yellow
+        'rgb(54, 162, 235)',  // Blue
+        'rgb(255, 159, 64)',  // Orange
+        'rgb(75, 192, 192)'   // Teal
+      ],
+      borderWidth: 2,
+      borderRadius: 5,
+      barThickness: 60,
+      maxBarThickness: 80,
+      categoryPercentage: 0.8,
+      barPercentage: 0.9
     }]
   },
   options: {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
+      legend: { display: false },
       title: {
         display: true,
-        text: 'Daily Product Production Overview',
+        text: 'Order Status Distribution',
         font: {
           size: 18,
           weight: 'bold'
-        }
-      },
-      legend: {
-        display: false
+        },
+        padding: { bottom: 20 }
       },
       tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 14,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 13
+        },
+        padding: 12,
+        callbacks: {
+          label: function(context) {
+            return `Count: ${context.raw}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: { 
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          precision: 0,
+          font: {
+            size: 12,
+            weight: 'bold'
+          },
+          padding: 8
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)',
+          drawBorder: false
+        },
+        title: {
+          display: true,
+          text: 'Number of Orders',
+          font: {
+            size: 14,
+            weight: 'bold'
+          },
+          padding: { top: 10, bottom: 10 }
+        }
+      },
+      x: {
+        ticks: {
+          font: {
+            size: 12,
+            weight: 'bold'
+          },
+          padding: 10
+        },
+        grid: {
+          display: false
+        }
+      }
+    },
+    layout: {
+      padding: {
+        left: 15,
+        right: 15,
+        top: 15,
+        bottom: 15
+      }
+    },
+    animation: {
+      duration: 2000,
+      easing: 'easeOutQuart'
+    }
+  }
+});
+
+//Production
+const productionCtx = document.getElementById('productionChart').getContext('2d');
+
+const labels = {{ production_labels|safe }};
+const dataPoints = {{ production_quantities|safe }};
+
+const productionChart = new Chart(productionCtx, {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Daily Production Output',
+        data: dataPoints,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        fill: true,
+        tension: 0.1
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'Daily Dairy Products Production Overview',
+        font: {
+          size: 18,
+          weight: 'bold'
+        },
+        padding: { bottom: 20 }
+      },
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      tooltip: {
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        titleColor: '#333',
+        bodyColor: '#666',
+        borderColor: '#ccc',
+        borderWidth: 1,
+        titleFont: {
+          size: 14,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 13
+        },
+        padding: 12,
         callbacks: {
           label: function (context) {
             return `${context.dataset.label}: ${context.raw} units`;
@@ -329,86 +392,144 @@ const productionChart = new Chart(productionCtx, {
     scales: {
       y: {
         beginAtZero: true,
+        ticks: {
+          stepSize: 20,
+          font: {
+            size: 12,
+            weight: 'bold'
+          },
+          padding: 8,
+          callback: function(value) {
+            return value + ' units';
+          }
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)',
+          drawBorder: false
+        },
         title: {
           display: true,
-          text: 'Quantity Produced',
+          text: 'Units Produced',
           font: {
-            size: 14
-          }
+            size: 14,
+            weight: 'bold'
+          },
+          padding: { top: 10, bottom: 10 }
         }
       },
       x: {
+        ticks: {
+          display: false
+        },
+        grid: {
+          display: false
+        },
         title: {
           display: true,
-          text:'Date',
+          text: 'Production Timeline',
           font: {
-            size: 14
-          }
+            size: 14,
+            weight: 'bold'
+          },
+          padding: { top: 10 }
         }
       }
+    },
+    layout: {
+      padding: {
+        left: 15,
+        right: 15,
+        top: 15,
+        bottom: 20
+      }
+    },
+    animation: {
+      duration: 1500,
+      easing: 'easeInOutQuart'
     }
   }
 });
 
+// Sales Chart
 
-
-// Sales Analysis Chart
 const salesAnalysisCtx = document.getElementById('salesAnalysisChart').getContext('2d');
+
+const totalSales = {{ total_sales }};
+const highestSales = {{ highest_sales }};
+const lowestSales = {{ lowest_sales }};
+
+// Create gradient backgrounds
+const totalSalesGradient = salesAnalysisCtx.createLinearGradient(0, 0, 0, 400);
+totalSalesGradient.addColorStop(0, 'rgba(54, 162, 235, 0.8)');
+totalSalesGradient.addColorStop(1, 'rgba(54, 162, 235, 0.2)');
+
+const highestSalesGradient = salesAnalysisCtx.createLinearGradient(0, 0, 0, 400);
+highestSalesGradient.addColorStop(0, 'rgba(75, 192, 192, 0.8)');
+highestSalesGradient.addColorStop(1, 'rgba(75, 192, 192, 0.2)');
+
+const lowestSalesGradient = salesAnalysisCtx.createLinearGradient(0, 0, 0, 400);
+lowestSalesGradient.addColorStop(0, 'rgba(255, 159, 64, 0.8)');
+lowestSalesGradient.addColorStop(1, 'rgba(255, 159, 64, 0.2)');
+
 new Chart(salesAnalysisCtx, {
-  type: 'bar',
+  type: 'pie', // or 'doughnut' for doughnut chart
   data: {
     labels: [
-      'Total Sales' + '\n(All Products)', 
-      'Highest Sales' + '\n({{ highest_sales_product }})', 
-      'Lowest Sales' + '\n({{ lowest_sales_product }})'
+      'Total Sales\n(All Products)', 
+      `Highest Sales\n({{ highest_sales_product }})`, 
+      `Lowest Sales\n({{ lowest_sales_product }})`
     ],
     datasets: [{
       label: 'Sales Analysis',
-      data: [{{ total_sales }}, {{ highest_sales }}, {{ lowest_sales }}],
+      data: [totalSales, highestSales, lowestSales], // Sales data
       backgroundColor: [
-        'rgba(75, 192, 192, 0.6)',
-        'rgba(255, 99, 132, 0.6)',
-        'rgba(255, 205, 86, 0.6)'
+        totalSalesGradient,
+        highestSalesGradient,
+        lowestSalesGradient
       ],
       borderColor: [
+        'rgb(54, 162, 235)',
         'rgb(75, 192, 192)',
-        'rgb(255, 99, 132)',
-        'rgb(255, 205, 86)'
+        'rgb(255, 159, 64)'
       ],
-      borderWidth: 1,
-      barThickness: 60,
-      maxBarThickness: 70,
-      categoryPercentage: 0.8,
-      barPercentage: 0.9
+      borderWidth: 2
     }]
   },
   options: {
     responsive: true,
-    maintainAspectRatio: true,
-    aspectRatio: 2.5,
+    maintainAspectRatio: false,
     plugins: {
       title: {
         display: true,
         text: 'Sales Analysis Overview',
         font: {
-          size: 14
+          size: 18,
+          weight: 'bold'
         },
-        padding: { bottom: 10 }
+        padding: { bottom: 20 }
       },
       legend: {
-        display: false
+        display: true,
+        position: 'top',
       },
       tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleFont: {
+          size: 14,
+          weight: 'bold'
+        },
+        bodyFont: {
+          size: 13
+        },
+        padding: 12,
         callbacks: {
           label: function(context) {
             let label = `Sales: Rs.${context.raw.toLocaleString()}`;
-
             if (context.dataIndex === 1) {
-              label += ` | Quantity: {{ highest_sales_quantity }} {{ highest_sales_unit }}`;
+              label += ` | Quantity: {{ highest_sales_product_quantity }} {{ highest_sales_unit }}`;
             } else if (context.dataIndex === 2) {
-              label += ` | Quantity: {{ lowest_sales_quantity }} {{ lowest_sales_unit }}`;
+              label += ` | Quantity: {{ lowest_sales_product_quantity }} {{ lowest_sales_unit }}`;
             }
-
             return label;
           },
           title: function(context) {
@@ -417,49 +538,12 @@ new Chart(salesAnalysisCtx, {
         }
       }
     },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Amount (Rs.)',
-          font: {
-            size: 12
-          },
-          padding: { top: 0, bottom: 0 }
-        },
-        ticks: {
-          font: {
-            size: 12
-          },
-          callback: function(value) {
-            return 'Rs.' + value.toLocaleString();
-          },
-          padding: 5
-        }
-      },
-      x: {
-        ticks: {
-          font: {
-            size: 12
-          },
-          autoSkip: false,
-          maxRotation: 0,
-          padding: 5
-        }
-      }
-    },
-    layout: {
-      padding: {
-        left: 5,
-        right: 5,
-        top: 5,
-        bottom: 15
-      }
+    animation: {
+      duration: 2000,
+      easing: 'easeOutQuart'
     }
   }
 });
-
-</script>
+  </script>
 
 {% endblock content %}

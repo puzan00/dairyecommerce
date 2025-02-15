@@ -113,7 +113,6 @@ def logout_view(request):
 # ---------------------------------------------------------------------------------
 # ------------------------ ADMIN RELATED VIEWS START ------------------------------
 # ---------------------------------------------------------------------------------
-
 @login_required(login_url="adminlogin")
 def admin_dashboard_view(request):
     # Counts for dashboard cards
@@ -185,7 +184,7 @@ def admin_dashboard_view(request):
 
     for production_date in sorted_production_dates:
         for entry in production_data[production_date]:
-            production_labels.append(f"{entry['product_name']} ({production_date.strftime('%m-%d')})")
+            production_labels.append(f"{entry['product_name']} ({production_date.strftime('%m-%d-%Y')})")
             production_quantities.append(entry['quantity_produced'])
             production_dates.append(production_date)
 
@@ -196,16 +195,18 @@ def admin_dashboard_view(request):
     sales_orders = orders.annotate(order_sales=F('product__price') * F('quantity'))
     
     highest_sales_order = sales_orders.order_by('-order_sales').first()
-    lowest_sales_order = sales_orders.order_by('order_sales').first()
+    lowest_sales_order = sales_orders.filter(order_sales__gt=0).order_by('order_sales').first()
 
+    # For highest sales order
     highest_sales = highest_sales_order.order_sales if highest_sales_order else 0
     highest_sales_product = highest_sales_order.product.name if highest_sales_order else 'N/A'
-    highest_sales_quantity = highest_sales_order.quantity if highest_sales_order else 0
+    highest_sales_product_quantity = highest_sales_order.product.quantity if highest_sales_order else 0
     highest_sales_unit = highest_sales_order.product.unit if highest_sales_order else 'N/A'
 
+    # For lowest sales order
     lowest_sales = lowest_sales_order.order_sales if lowest_sales_order else 0
     lowest_sales_product = lowest_sales_order.product.name if lowest_sales_order else 'N/A'
-    lowest_sales_quantity = lowest_sales_order.quantity if lowest_sales_order else 0
+    lowest_sales_product_quantity = lowest_sales_order.product.quantity if lowest_sales_order else 0
     lowest_sales_unit = lowest_sales_order.product.unit if lowest_sales_order else 'N/A'
 
     # Total Orders (Count of all orders)
@@ -220,11 +221,11 @@ def admin_dashboard_view(request):
         "total_orders": total_orders,
         "highest_sales": highest_sales,
         "highest_sales_product": highest_sales_product,
-        "highest_sales_quantity": highest_sales_quantity,
+        "highest_sales_product_quantity": highest_sales_product_quantity,
         "highest_sales_unit": highest_sales_unit,
         "lowest_sales": lowest_sales,
         "lowest_sales_product": lowest_sales_product,
-        "lowest_sales_quantity": lowest_sales_quantity,
+        "lowest_sales_product_quantity": lowest_sales_product_quantity,
         "lowest_sales_unit": lowest_sales_unit,
         "recent_orders": recent_orders,
         "expired_products": expired_products,
@@ -241,7 +242,6 @@ def admin_dashboard_view(request):
         "production_dates": production_dates,
     }
     
-
     return render(request, "ecom/admin_dashboard.html", context)
 
 # Add new product production record view
@@ -307,10 +307,9 @@ def delete_product_production_view(request, production_id):
 
 # Product production list view: Displays all product production records and totals
 from datetime import date
-
 def product_production_list_view(request):
-    # Get all product production records
-    product_productions = ProductProduction.objects.all()
+    # Get all product production records sorted by most recent production date
+    product_productions = ProductProduction.objects.all().order_by('-production_date')
 
     # Calculate total quantity produced for each product by date
     product_totals = {}
@@ -341,6 +340,7 @@ def product_production_list_view(request):
         'product_productions': product_productions,
         'product_totals': product_totals,
     })
+
 
 
 # admin view customer table
