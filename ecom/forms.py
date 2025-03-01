@@ -11,7 +11,11 @@ class CustomerUserForm(forms.ModelForm):
         fields = ["first_name", "last_name", "username", "password"]
         profile_pic = forms.ImageField(required=True)
 
-
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Username already exists.")
+        return username
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = models.Customer

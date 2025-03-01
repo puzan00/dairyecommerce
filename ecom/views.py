@@ -69,7 +69,7 @@ def customer_signup_view(request):
             username = userForm.cleaned_data.get('username')
             email = userForm.cleaned_data.get('email')
 
-            # Check if username or email already exists
+            # Check if username  already exists
             if User.objects.filter(username=username).exists():
                 messages.error(request, "Username already exists.")
            

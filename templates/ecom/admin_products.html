@@ -80,7 +80,7 @@
                     <i class="fas fa-edit"></i>
                   </a>
                   {% if not p.is_sold %}
-                  <a href="{% url 'delete_product' p.id %}" class="btn btn-sm btn-outline-danger" title="Delete Product" onclick="return confirm('Are you sure you want to delete this product?')">
+                  <a href="{% url 'delete_product' p.id %}" class="btn btn-sm btn-outline-danger" title="Delete Product" onclick="return confirmDelete();">
                     <i class="fas fa-trash-alt"></i>
                   </a>
                   {% endif %}
@@ -93,8 +93,6 @@
                     <i class="fas fa-times-circle"></i> Unmark as Sold
                   </a>
                   {% endif %}
-                  <!-- Add Delete Button, but hide if the product is sold -->
-                 
                 </div>
               </td>
             </tr>
@@ -116,6 +114,7 @@
     </div>
   </div>
 </div>
+
 <style>
   .product-img,
   .product-img-placeholder {
@@ -218,6 +217,15 @@
   function formatDate(date) {
     var options = { year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
+  }
+
+  function confirmDelete() {
+    var confirmation = confirm("Are you sure you want to delete this product?");
+    if (confirmation) {
+      return true;  // Proceed with the deletion
+    } else {
+      return false;  // Abort the deletion
+    }
   }
 </script>
 
