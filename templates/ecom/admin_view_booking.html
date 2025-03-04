@@ -39,6 +39,7 @@
               <th class="cell">Order ID</th>
               <th class="cell">Customer</th>
               <th class="cell">Phone</th>
+              <th class="cell">Product ID</th>
               <th class="cell">Product</th>
               <th class="cell">Quantity</th>
               <th class="cell">Status</th>
@@ -60,7 +61,9 @@
               <td class="cell">{{ c.mobile }}</td>
               {% endfor %}
               {% for p in product %}
+              <td class="cell">{{ p.id}}</td>
               <td class="cell">{{ p.name|capfirst }}</td>
+              
               <td class="cell">
                 <span class="badge bg-light text-dark">
                   {{ p.quantity }} {{ p.unit }}
