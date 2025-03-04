@@ -24,7 +24,7 @@ class CustomerForm(forms.ModelForm):
 class EditProfileForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "username"]  # Exclude password field
+        fields = ["first_name", "last_name", "username"]  
 
 class EditCustomerForm(forms.ModelForm):
     class Meta:

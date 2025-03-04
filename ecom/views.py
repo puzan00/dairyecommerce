@@ -26,14 +26,14 @@ from django.contrib.auth.models import User, Group
 def home_view(request):
     products = models.Product.objects.all()
 
-    # Remove the logic for counting products in cart
+    # Check if the user is authenticated
     if request.user.is_authenticated:
         return HttpResponseRedirect("afterlogin")
 
     return render(
         request,
         "ecom/index.html",
-        {"products": products},  # Remove product_count_in_cart from context
+        {"products": products},  
     )
 
 # Admin login view: Handles admin login and redirects based on authentication.
@@ -79,7 +79,7 @@ def customer_signup_view(request):
                 user.set_password(user.password)  # Ensure the password is hashed
                 user.save()
 
-                # Save the customer data without committing (so we can assign the user)
+                # Save the customer data without committing (it means not in database immediately) (so we can assign the user)
                 customer = customerForm.save(commit=False)
                 customer.user = user  # Link the user to the customer profile
                 customer.save()
@@ -293,6 +293,7 @@ def edit_product_production_view(request, production_id):
         'production': production,
     }
     return render(request, 'ecom/edit_product_production.html', context)
+
 # Delete product production record view
 def delete_product_production_view(request, production_id):
     # Get the production record and handle deletion
@@ -363,7 +364,6 @@ def admin_products_view(request):
         product.formatted_date_added = product.date_added.strftime("%Y-%m-%d") if product.date_added else None
 
 
-    
     context = {
         "products": products,
         "total_products": len(products),
@@ -417,7 +417,6 @@ def delete_product(request, product_id):
 
     # Ensure the product is not sold before deleting
     if product.is_sold:
-        # Optionally, you can add a message indicating the product cannot be deleted
         messages.error(request, "This product cannot be deleted because it has already been sold.")
         return redirect('admin-products')
 
@@ -533,6 +532,7 @@ def update_product_view(request, pk):
             return redirect("admin-products")
 
     return render(request, "ecom/admin_update_product.html", {"productForm": productForm})
+
 # views.py
 @login_required(login_url="adminlogin")
 def expiry_alert_list(request):
@@ -771,9 +771,7 @@ def customer_address_view(request):
         },
     )
 
-
-
-#  payment success view 
+#for payment process
 @login_required(login_url="customerlogin")
 def payment_success_view(request):
     customer = get_object_or_404(models.Customer, user=request.user)
@@ -791,7 +789,7 @@ def payment_success_view(request):
                     {"message": f"Insufficient stock for {cart_item.product.name}"})
 
         orders = []
-        # If all stock checks pass, create orders and update stock
+        # If all stock checks pass, create orders
         for cart_item in cart_items:
             # Create order
             order = models.Orders(
@@ -805,10 +803,6 @@ def payment_success_view(request):
             )
             orders.append(order)
 
-            # Update product stock
-            cart_item.product.quantity -= cart_item.quantity
-            cart_item.product.save()
-
         # Bulk create orders
         models.Orders.objects.bulk_create(orders)
         
@@ -819,12 +813,13 @@ def payment_success_view(request):
     return render(request, "ecom/payment_success.html", {"orders": orders})
 
 
+
 @login_required(login_url="customerlogin")
 @user_passes_test(is_customer)
 def my_order_view(request):
     # View to display the orders of the logged-in customer
     customer = models.Customer.objects.get(user_id=request.user.id)
-    orders = models.Orders.objects.filter(customer=customer).select_related('product')  # Optimized query
+    orders = models.Orders.objects.filter(customer=customer).select_related('product').order_by('-order_date')  
     
     return render(
         request,
